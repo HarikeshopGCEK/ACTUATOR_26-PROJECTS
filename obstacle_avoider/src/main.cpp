@@ -11,17 +11,19 @@
 #define RC_RIGHT_IN1 26
 #define RC_RIGHT_IN2 27
 
-#define RC_IR_LEFT 32
-#define RC_IR_RIGHT 34
+
 // Left Ultrasonic
-#define RC_US_LEFT_TRIG 13
+#define RC_US_LEFT_TRIG 32
 #define RC_US_LEFT_ECHO 35
 
 // Right Ultrasonic
-#define RC_US_RIGHT_TRIG 14
-#define RC_US_RIGHT_ECHO 36
+#define RC_US_RIGHT_TRIG 21  // Connect to Trig
+#define RC_US_RIGHT_ECHO 22  // Connect to Echo
+
 
 #define THRESHOLD_DISTANCE 20.0 // Distance threshold in cm
+
+#define SPEED 100
 void setup()
 {
     Serial.begin(115200);
@@ -37,6 +39,8 @@ void setup()
     pinMode(RC_US_LEFT_ECHO, INPUT);
     pinMode(RC_US_RIGHT_TRIG, OUTPUT);
     pinMode(RC_US_RIGHT_ECHO, INPUT);
+
+    digitalWrite(RC_MOTOR_STBY,HIGH);
 }
 float measureDistance(int trigPin, int echoPin)
 {
@@ -53,7 +57,11 @@ float measureDistance(int trigPin, int echoPin)
 void loop()
 {
     float leftDistance = measureDistance(RC_US_LEFT_TRIG, RC_US_LEFT_ECHO);
+    Serial.print("Left Distance: ");
+    Serial.print(leftDistance);
     float rightDistance = measureDistance(RC_US_RIGHT_TRIG, RC_US_RIGHT_ECHO);
+    Serial.print(" | Right Distance: ");
+    Serial.println(rightDistance);
 
     if (leftDistance < THRESHOLD_DISTANCE && rightDistance < THRESHOLD_DISTANCE)
     {
@@ -69,34 +77,35 @@ void loop()
     else if (leftDistance < THRESHOLD_DISTANCE)
     {
         // Left sensor detects an obstacle, turn right
+        digitalWrite(RC_LEFT_IN1, HIGH);
+        digitalWrite(RC_LEFT_IN2, LOW);
+        analogWrite(RC_LEFT_PWM, SPEED);
+
+        digitalWrite(RC_RIGHT_IN1, LOW);
+        digitalWrite(RC_RIGHT_IN2, LOW);
+        analogWrite(RC_RIGHT_PWM, 0);
+    }
+    else if (rightDistance < THRESHOLD_DISTANCE)
+    {
+        // Right sensor detects an obstacle, turn left
         digitalWrite(RC_LEFT_IN1, LOW);
         digitalWrite(RC_LEFT_IN2, LOW);
         analogWrite(RC_LEFT_PWM, 0);
 
         digitalWrite(RC_RIGHT_IN1, HIGH);
         digitalWrite(RC_RIGHT_IN2, LOW);
-        analogWrite(RC_RIGHT_PWM, 255);
-    }
-    else if (rightDistance < THRESHOLD_DISTANCE)
-    {
-        // Right sensor detects an obstacle, turn left
-        digitalWrite(RC_LEFT_IN1, HIGH);
-        digitalWrite(RC_LEFT_IN2, LOW);
-        analogWrite(RC_LEFT_PWM, 255);
-
-        digitalWrite(RC_RIGHT_IN1, HIGH);
-        digitalWrite(RC_RIGHT_IN2, LOW);
-        analogWrite(RC_RIGHT_PWM, 255);
+        analogWrite(RC_RIGHT_PWM, SPEED);
     }
     else
     {
         // No sensors detect an obstacle, move forward
         digitalWrite(RC_LEFT_IN1, HIGH);
         digitalWrite(RC_LEFT_IN2, LOW);
-        analogWrite(RC_LEFT_PWM, 255);
+        analogWrite(RC_LEFT_PWM, SPEED);
 
         digitalWrite(RC_RIGHT_IN1, HIGH);
         digitalWrite(RC_RIGHT_IN2, LOW);
-        analogWrite(RC_RIGHT_PWM, 255);
+        analogWrite(RC_RIGHT_PWM, SPEED);
     }
+    delay(100); // Add a small delay to avoid overwhelming the serial output
 }
