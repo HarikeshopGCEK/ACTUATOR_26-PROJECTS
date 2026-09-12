@@ -1,70 +1,108 @@
 #include <Arduino.h>
 
-#define RC_MOTOR_STBY 23
-
-// Left motor
-#define RC_LEFT_PWM 33
-#define RC_LEFT_IN1 18
-#define RC_LEFT_IN2 19
-
-// Right motor
-#define RC_RIGHT_PWM 25
-#define RC_RIGHT_IN1 26
-#define RC_RIGHT_IN2 27
+// === TB6612FNG MOTOR DRIVER PINS ===
+#define ENABLE 23   // Enable pin (HIGH = ON)
+#define LEFT_PWM 33 // Left motor speed (0-255)
+#define LEFT_IN1 18 // Left motor direction
+#define LEFT_IN2 19
+#define RIGHT_PWM 25 // Right motor speed (0-255)
+#define RIGHT_IN1 26 // Right motor direction
+#define RIGHT_IN2 27
 
 void setup()
 {
-    pinMode(RC_MOTOR_STBY, OUTPUT);
+    Serial.begin(115200);
+    delay(500);
+    Serial.println("\n=== MOTOR DRIVER TEST ===");
+    Serial.println("TB6612FNG: Controls 2 DC motors\n");
 
-    // Left motor
-    pinMode(RC_LEFT_PWM, OUTPUT);
-    pinMode(RC_LEFT_IN1, OUTPUT);
-    pinMode(RC_LEFT_IN2, OUTPUT);
+    // Set all pins as outputs
+    pinMode(ENABLE, OUTPUT);
+    pinMode(LEFT_PWM, OUTPUT);
+    pinMode(LEFT_IN1, OUTPUT);
+    pinMode(LEFT_IN2, OUTPUT);
+    pinMode(RIGHT_PWM, OUTPUT);
+    pinMode(RIGHT_IN1, OUTPUT);
+    pinMode(RIGHT_IN2, OUTPUT);
 
-    // Right motor
-    pinMode(RC_RIGHT_PWM, OUTPUT);
-    pinMode(RC_RIGHT_IN1, OUTPUT);
-    pinMode(RC_RIGHT_IN2, OUTPUT);
+    // Turn ON motor driver
+    digitalWrite(ENABLE, HIGH);
+}
 
-    // Enable motor driver
-    digitalWrite(RC_MOTOR_STBY, HIGH);
+void moveForward()
+{
+    Serial.println("FORWARD");
+    digitalWrite(LEFT_IN1, HIGH);
+    digitalWrite(LEFT_IN2, LOW);
+    digitalWrite(RIGHT_IN1, HIGH);
+    digitalWrite(RIGHT_IN2, LOW);
+    analogWrite(LEFT_PWM, 200);
+    analogWrite(RIGHT_PWM, 200);
+}
+
+void moveBackward()
+{
+    Serial.println("BACKWARD");
+    digitalWrite(LEFT_IN1, LOW);
+    digitalWrite(LEFT_IN2, HIGH);
+    digitalWrite(RIGHT_IN1, LOW);
+    digitalWrite(RIGHT_IN2, HIGH);
+    analogWrite(LEFT_PWM, 200);
+    analogWrite(RIGHT_PWM, 200);
+}
+
+void turnRight()
+{
+    Serial.println("TURN RIGHT");
+    digitalWrite(LEFT_IN1, HIGH);
+    digitalWrite(LEFT_IN2, LOW);
+    digitalWrite(RIGHT_IN1, LOW);
+    digitalWrite(RIGHT_IN2, LOW);
+    analogWrite(LEFT_PWM, 200);
+    analogWrite(RIGHT_PWM, 0);
+}
+
+void turnLeft()
+{
+    Serial.println("TURN LEFT");
+    digitalWrite(LEFT_IN1, LOW);
+    digitalWrite(LEFT_IN2, LOW);
+    digitalWrite(RIGHT_IN1, HIGH);
+    digitalWrite(RIGHT_IN2, LOW);
+    analogWrite(LEFT_PWM, 0);
+    analogWrite(RIGHT_PWM, 200);
+}
+
+void stopMotors()
+{
+    Serial.println("STOP\n");
+    digitalWrite(LEFT_IN1, LOW);
+    digitalWrite(LEFT_IN2, LOW);
+    digitalWrite(RIGHT_IN1, LOW);
+    digitalWrite(RIGHT_IN2, LOW);
+    analogWrite(LEFT_PWM, 0);
+    analogWrite(RIGHT_PWM, 0);
 }
 
 void loop()
 {
-    // Test left motor forward
-    digitalWrite(RC_LEFT_IN1, HIGH);
-    digitalWrite(RC_LEFT_IN2, LOW);
-    analogWrite(RC_LEFT_PWM, 200);
+    moveForward();
     delay(2000);
+    stopMotors();
+    delay(500);
 
-    // Test left motor backward
-    digitalWrite(RC_LEFT_IN1, LOW);
-    digitalWrite(RC_LEFT_IN2, HIGH);
-    analogWrite(RC_LEFT_PWM, 200);
+    moveBackward();
     delay(2000);
+    stopMotors();
+    delay(500);
 
-    // Stop left motor
-    digitalWrite(RC_LEFT_IN1, LOW);
-    digitalWrite(RC_LEFT_IN2, LOW);
-    analogWrite(RC_LEFT_PWM, 0);
-    delay(1000);
+    turnLeft();
+    delay(1500);
+    stopMotors();
+    delay(500);
 
-    // Test right motor forward
-    digitalWrite(RC_RIGHT_IN1, HIGH);
-    digitalWrite(RC_RIGHT_IN2, LOW);
-    analogWrite(RC_RIGHT_PWM, 200);
+    turnRight();
+    delay(1500);
+    stopMotors();
     delay(2000);
-
-    // Test right motor backward
-    digitalWrite(RC_RIGHT_IN1, LOW);
-    digitalWrite(RC_RIGHT_IN2, HIGH);
-    analogWrite(RC_RIGHT_PWM, 200);
-    delay(2000);
-
-    // Stop right motor
-    digitalWrite(RC_RIGHT_IN1, LOW);
-    digitalWrite(RC_RIGHT_IN2, LOW);
-    analogWrite(RC_RIGHT_PWM, 0);
-    delay(1000);
 }

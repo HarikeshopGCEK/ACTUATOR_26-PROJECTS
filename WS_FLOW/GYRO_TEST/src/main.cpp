@@ -3,150 +3,122 @@
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
 
-// ========================
-// MPU6050 SENSOR OBJECT
-// ========================
-
+// === MPU6050 SENSOR OBJECT ===
 Adafruit_MPU6050 mpu;
 
-// ========================
-// I2C PIN DEFINITIONS
-// ========================
-// NodeMCU ESP8266:
-// D1 (GPIO5)  = SCL (Clock)
-// D2 (GPIO4)  = SDA (Data)
-
-#define MPU_SDA D2 // GPIO4
-#define MPU_SCL D1 // GPIO5
-
-// ========================
-// GLOBAL VARIABLES
-// ========================
-
-// Raw sensor readings
-float accelX, accelY, accelZ; // Acceleration (m/s²)
-float gyroX, gyroY, gyroZ;    // Angular velocity (rad/s)
-float tempC;                  // Temperature (°C)
-
-// Calculated angles
-float pitch = 0, roll = 0; // Angles in degrees
-float pitch_gyro = 0, roll_gyro = 0;
-
-// Time tracking
-unsigned long lastTime = 0;
-float dt = 0; // Delta time
-
-// Calibration offsets
-float gyroOffsetX = 0, gyroOffsetY = 0, gyroOffsetZ = 0;
-
-// ========================
-// SETUP FUNCTION
-// ========================
+// === I2C PINS (ESP8266 NodeMCU) ===
+#define SDA D2 // GPIO4
+#define SCL D1 // GPIO5
 
 void setup()
 {
     Serial.begin(115200);
-    delay(1000);
-
-    Serial.println("\n\n=== MPU6050 GYROSCOPE TEST ===");
-    Serial.println("6-Axis Motion Sensor (Accelerometer + Gyroscope)");
-    Serial.println("Platform: ESP8266 NodeMCU");
-    Serial.println("I2C: SDA=D2(GPIO4), SCL=D1(GPIO5)");
-    Serial.println("=====================================\n");
+    delay(500);
+    Serial.println("\n=== MPU6050 GYROSCOPE TEST ===");
+    Serial.println("6-Axis Motion Sensor");
+    Serial.println("Accelerometer + Gyroscope\n");
 
     // Initialize I2C
-    Serial.println("Initializing I2C...");
-    Wire.begin(MPU_SDA, MPU_SCL);
-    delay(500);
+    Wire.begin(SDA, SCL);
 
     // Initialize MPU6050
-    Serial.println("Initializing MPU6050...");
     if (!mpu.begin())
     {
-        Serial.println("ERROR: Could not find MPU6050 sensor!");
-        Serial.println("Check I2C connections (SDA=D2, SCL=D1)");
+        Serial.println("ERROR: MPU6050 not found!");
+        Serial.println("Check I2C wiring (SDA=D2, SCL=D1)");
         while (1)
-        {
-            delay(10);
-        }
+            delay(100);
     }
 
-    Serial.println("✓ MPU6050 found!");
+    Serial.println("MPU6050 initialized!\n");
+}
 
-    // Set accelerometer range
-    mpu.setAccelerometerRange(MPU6050_RANGE_16_G);
-    Serial.print("Accelerometer range set to: ");
-    switch (mpu.getAccelerometerRange())
-    {
-    case MPU6050_RANGE_2_G:
-        Serial.println("±2G");
-        break;
-    case MPU6050_RANGE_4_G:
-        Serial.println("±4G");
-        break;
-    case MPU6050_RANGE_8_G:
-        Serial.println("±8G");
-        break;
-    case MPU6050_RANGE_16_G:
-        Serial.println("±16G");
-        break;
-    }
+void loop()
+{
+    // Get sensor readings
+    sensors_event_t a, g, temp;
+    mpu.getEvent(&a, &g, &temp);
 
-    // Set gyroscope range
-    mpu.setGyroRange(MPU6050_RANGE_500_DEG);
-    Serial.print("Gyro range set to: ");
-    switch (mpu.getGyroRange())
-    {
-    case MPU6050_RANGE_250_DEG:
-        Serial.println("±250 °/s");
-        break;
-    case MPU6050_RANGE_500_DEG:
-        Serial.println("±500 °/s");
-        break;
-    case MPU6050_RANGE_1000_DEG:
-        Serial.println("±1000 °/s");
-        break;
-    case MPU6050_RANGE_2000_DEG:
-        Serial.println("±2000 °/s");
-        break;
-    }
+    // === ACCELEROMETER (measures tilt/movement) ===
+    // Units: m/s²
+    // X,Y,Z range: -16 to +16 m/s²
+    Serial.print("Accel [m/s²]: ");
+    Serial.print("X=");
+    Serial.print(a.acceleration.x, 2);
+    Serial.print("  Y=");
+    Serial.print(a.acceleration.y, 2);
+    Serial.print("  Z=");
+    Serial.print(a.acceleration.z, 2);
+    Serial.print("  | ");
 
-    // Set filter bandwidth
-    mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
-    Serial.print("Filter bandwidth set to: ");
-    switch (mpu.getFilterBandwidth())
-    {
-    case MPU6050_BAND_260_HZ:
-        Serial.println("260 Hz");
-        break;
-    case MPU6050_BAND_184_HZ:
-        Serial.println("184 Hz");
-        break;
-    case MPU6050_BAND_94_HZ:
-        Serial.println("94 Hz");
-        break;
-    case MPU6050_BAND_44_HZ:
-        Serial.println("44 Hz");
-        break;
-    case MPU6050_BAND_21_HZ:
-        Serial.println("21 Hz");
-        break;
-    case MPU6050_BAND_10_HZ:
-        Serial.println("10 Hz");
-        break;
-    case MPU6050_BAND_5_HZ:
-        Serial.println("5 Hz");
-        break;
-    }
+    // === GYROSCOPE (measures rotation speed) ===
+    // Units: radians per second
+    // X,Y,Z range: -500 to +500 rad/s
+    Serial.print("Gyro [rad/s]: ");
+    Serial.print("X=");
+    Serial.print(g.gyro.x, 4);
+    Serial.print("  Y=");
+    Serial.print(g.gyro.y, 4);
+    Serial.print("  Z=");
+    Serial.print(g.gyro.z, 4);
+    Serial.print("  | ");
 
-    delay(1000);
+    // === TEMPERATURE ===
+    Serial.print("Temp=");
+    Serial.print(temp.temperature, 1);
+    Serial.println("°C");
 
-    // Calibrate gyroscope
-    Serial.println("\nCalibrating gyroscope (keep sensor still)...");
-    calibrateGyro();
-    Serial.println("✓ Gyroscope calibration complete!\n");
+    delay(300);
+}
+Serial.println("±250 °/s");
+break;
+case MPU6050_RANGE_500_DEG:
+Serial.println("±500 °/s");
+break;
+case MPU6050_RANGE_1000_DEG:
+Serial.println("±1000 °/s");
+break;
+case MPU6050_RANGE_2000_DEG:
+Serial.println("±2000 °/s");
+break;
+}
 
-    lastTime = millis();
+// Set filter bandwidth
+mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+Serial.print("Filter bandwidth set to: ");
+switch (mpu.getFilterBandwidth())
+{
+case MPU6050_BAND_260_HZ:
+    Serial.println("260 Hz");
+    break;
+case MPU6050_BAND_184_HZ:
+    Serial.println("184 Hz");
+    break;
+case MPU6050_BAND_94_HZ:
+    Serial.println("94 Hz");
+    break;
+case MPU6050_BAND_44_HZ:
+    Serial.println("44 Hz");
+    break;
+case MPU6050_BAND_21_HZ:
+    Serial.println("21 Hz");
+    break;
+case MPU6050_BAND_10_HZ:
+    Serial.println("10 Hz");
+    break;
+case MPU6050_BAND_5_HZ:
+    Serial.println("5 Hz");
+    break;
+}
+
+delay(1000);
+
+// Calibrate gyroscope
+Serial.println("\nCalibrating gyroscope (keep sensor still)...");
+calibrateGyro();
+Serial.println("✓ Gyroscope calibration complete!\n");
+
+lastTime = millis();
 }
 
 // ========================

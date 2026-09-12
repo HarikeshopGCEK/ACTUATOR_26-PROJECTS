@@ -1,53 +1,60 @@
-# MPU6050 Gyroscope Test Project
+# MPU6050 Gyroscope Test
 
-## Overview
+## What It Does
 
-Complete MPU6050 6-axis motion sensor measurement and gesture detection for ESP8266 NodeMCU.
+Measures motion - which way is up, how fast you're spinning.
 
-## Hardware Required
-
-- **ESP8266 NodeMCU** or similar
-- **MPU6050 Sensor Module** (accelerometer + gyroscope)
-- **Pull-up resistors** (optional, usually built-in on sensor modules)
-- Power Supply (5V)
-
-## I2C Pin Configuration
+## How It Works
 
 ```
-NodeMCU ESP8266:
-  D1 (GPIO5)  → MPU6050 SCL (Clock)
-  D2 (GPIO4)  → MPU6050 SDA (Data)
-  GND         → MPU6050 GND
-  3.3V/5V     → MPU6050 VCC
+MPU6050 = Accelerometer + Gyroscope
+
+Accelerometer: Measures tilt (X, Y, Z direction)
+Gyroscope:     Measures rotation speed (spinning)
 ```
 
-## Features
+## Pin Connections (ESP8266)
 
-### 1. **Raw Sensor Readings**
+```
+D1 (GPIO5) → SCL (clock line)
+D2 (GPIO4) → SDA (data line)
+GND        → GND
+3.3V       → VCC
+```
 
-- Accelerometer (X, Y, Z) in m/s²
-- Gyroscope (X, Y, Z) in rad/s
-- Temperature in °C
+## What You Measure
 
-### 2. **Angle Calculation**
+```
+Accel [m/s²]: X=0.15  Y=0.42  Z=9.81
+Gyro [rad/s]: X=0.0043  Y=-0.0012  Z=0.0001
+Temp: 28.5°C
+```
 
-- **Accelerometer-based angles:** Pitch & Roll (static, drift-free)
-- **Gyroscope-based angles:** Pitch & Roll (fast response, with drift correction)
-- **Complementary Filter:** 95% gyro + 5% accelerometer
+## Sensor Values Explained
 
-### 3. **Visual Display**
+- **X axis:** Tilt left/right (roll)
+- **Y axis:** Tilt forward/backward (pitch)
+- **Z axis:** Vertical acceleration
+- **Temp:** Internal chip temperature
 
-- Real-time motion bars showing pitch and roll
-- Clear sensor values in terminal
-- Delta time measurement
+## Real-World Use
 
-### 4. **Gesture Detection**
+- 🎮 Game controllers (motion control)
+- 📱 Phone orientation
+- 🚗 Tilt detection
+- 🎯 Gesture recognition
+- ⚖️ Balance sensors
 
-- Tilt forward/backward (pitch detection)
-- Tilt left/right (roll detection)
-- Level detection
+## Simple Code
 
-## Sensor Specifications
+```cpp
+sensors_event_t a, g, temp;
+mpu.getEvent(&a, &g, &temp);
+
+float accelX = a.acceleration.x;  // m/s²
+float gyroX = g.gyro.x;           // rad/s
+float tempC = temp.temperature;   // °C
+```
 
 - **Accelerometer Range:** ±16G (configurable)
 - **Gyroscope Range:** ±500°/s (configurable)

@@ -1,29 +1,53 @@
-# Ultrasonic Sensor Test Project
+# Ultrasonic Sensor (HC-SR04) Test
 
-## Overview
+## What It Does
 
-Testing Ultrasonic sensors (HC-SR04) for distance measurement and obstacle detection.
+Measures distance using sound waves - like how bats navigate!
 
-## Hardware Required
+## How It Works
 
-- ESP32 DevKit
-- Ultrasonic Sensor Module (HC-SR04)
-- Power Supply (5V for sensor, 3.3V logic from ESP32)
-- Resistor network for level shifting (5V to 3.3V)
+```
+1. Send sound pulse from TRIG pin
+2. Sound bounces off object
+3. Receive echo on ECHO pin
+4. Calculate: distance = (time / 2) × sound_speed
+```
 
-## Pin Configuration
+## Pin Connections
 
-- Left Ultrasonic TRIG: GPIO13
-- Left Ultrasonic ECHO: GPIO35 (input only)
-- Right Ultrasonic TRIG: GPIO14
-- Right Ultrasonic ECHO: GPIO36 (input only)
-- Power: 5V (from voltage regulator)
-- Ground: GND
+```
+Left Sensor:
+  GPIO13 → TRIG (trigger pulse out)
+  GPIO35 → ECHO (echo pulse in)
 
-## Features Tested
+Right Sensor:
+  GPIO14 → TRIG (trigger pulse out)
+  GPIO36 → ECHO (echo pulse in)
 
-- Single distance measurement
-- Dual sensor reading
-- Distance averaging for noise reduction
-- Obstacle detection
-- Dead zone detection
+Power: 5V (from voltage regulator)
+```
+
+## What You Get
+
+```
+LEFT: 25.3 cm  |  RIGHT: 180.5 cm  |  CLEAR
+```
+
+## Detection Ranges
+
+- Obstacle alert if < 20 cm
+- Maximum range ~400 cm
+- Blind spot < 2 cm
+
+## Real-World Use
+
+- 🚗 Robot obstacle avoidance
+- 🚪 Door sensors
+- 🤖 Parking assistance
+- 🎯 Proximity alarms
+
+## Important Note
+
+- Needs 5V power (not 3.3V!)
+- Use level shifter for ECHO pin
+- Keep sensor clean
