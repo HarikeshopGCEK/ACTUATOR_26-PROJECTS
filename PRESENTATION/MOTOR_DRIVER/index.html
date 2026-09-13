@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070e17" />
+    <title>TB6612FNG Motor Driver Field Notes | ACTUATOR 26</title>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="brand-mark" aria-label="ROBOCEK logo">
+        <img src="/ROBOCEK%20White%20Logo.png" alt="ROBOCEK" />
+      </div>
+
+      <div class="slides">
+
+        <!-- SLIDE 1: Title Slide -->
+        <section class="title-slide">
+          <span class="eyebrow">01 / HARDWARE ACTUATION</span>
+          <h1>TB6612FNG<br /><strong>Motor Driver</strong></h1>
+          <p class="lead subtitle">
+            High-Efficiency Dual MOSFET H-Bridge for Precision Motor Control.
+          </p>
+          <div class="meta">
+            <span>ACTUATOR 26</span><span>FIELD NOTES / 2026</span>
+          </div>
+          <div class="corner-mark" aria-hidden="true"></div>
+        </section>
+
+        <!-- SLIDE 2: Overview & Specs -->
+        <section>
+          <span class="eyebrow">02 / HARDWARE OVERVIEW</span>
+          <h2>Compact Powerhouse<br /><strong>Dual H-Bridge Module</strong></h2>
+          <p class="lead">
+            The TB6612FNG is a dual-channel IC capable of independently driving two DC motors or one 4-wire bipolar stepper motor.
+          </p>
+          <div class="reference-grid">
+            <div class="reference-card amber-border">
+              <span class="reference-tag">CURRENT CAPACITY</span>
+              <h3>1.2A Continuous</h3>
+              <p>Drives 1.2A per channel continuously, with peak current capacity up to 3.2A for short acceleration bursts.</p>
+            </div>
+            <div class="reference-card">
+              <span class="reference-tag">MOTOR VOLTAGE</span>
+              <h3>VM: 2.5V to 13.5V</h3>
+              <p>Wide motor supply range ideal for LiPo batteries, AA packs, or 12V DC power sources.</p>
+            </div>
+            <div class="reference-card emerald-border">
+              <span class="reference-tag">MOSFET EFFICIENCY</span>
+              <h3>Ultra-Low R<sub>DS(ON)</sub></h3>
+              <p>Internal MOSFET switches feature ~0.5Ω output resistance. Minimal heat loss and maximum battery runtime.</p>
+            </div>
+            <div class="reference-card rose-border">
+              <span class="reference-tag">PROTECTION</span>
+              <h3>Thermal Shutdown</h3>
+              <p>Built-in thermal cut-off circuit disables outputs if IC temperature exceeds safe threshold.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 3: Comparison - TB6612FNG vs L298N -->
+        <section>
+          <span class="eyebrow">03 / BENCHMARK</span>
+          <h2>Why Ditch L298N?<br /><strong>MOSFET vs BJT</strong></h2>
+          <p class="lead">Modern MOSFET technology outperforms legacy BJT drivers in every metric:</p>
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>Legacy L298N</th>
+                <th>TB6612FNG</th>
+                <th>Advantage</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col-feature">Internal Architecture</td>
+                <td class="col-legacy">BJT Darlington Transistors</td>
+                <td class="col-modern">Power MOSFETs</td>
+                <td>95%+ Energy Efficiency</td>
+              </tr>
+              <tr>
+                <td class="col-feature">Voltage Drop</td>
+                <td class="col-legacy">1.8V – 2.5V lost as heat</td>
+                <td class="col-modern">&lt; 0.2V loss</td>
+                <td>Full battery voltage reaches motor</td>
+              </tr>
+              <tr>
+                <td class="col-feature">Heat Dissipation</td>
+                <td class="col-legacy">Requires heavy aluminum heatsink</td>
+                <td class="col-modern">Runs cool without heatsink</td>
+                <td>Lightweight &amp; compact design</td>
+              </tr>
+              <tr>
+                <td class="col-feature">Form Factor</td>
+                <td class="col-legacy">Large bulky breakout board</td>
+                <td class="col-modern">Tiny 20mm x 20mm breakout</td>
+                <td>Ideal for small mobile robots</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- SLIDE 4: Pinout Architecture -->
+        <section>
+          <span class="eyebrow">04 / HARDWARE PINOUT</span>
+          <h2>Pin Reference<br /><strong>Logic vs Power</strong></h2>
+          <p class="lead">The module separates micro-controller logic inputs from heavy motor power rails:</p>
+          <div class="pin-grid">
+            <div class="pin-column">
+              <h3>LOGIC INPUTS (Microcontroller)</h3>
+              <div class="pin-item"><strong>STBY</strong> <span>Standby Control (Active HIGH)</span></div>
+              <div class="pin-item"><strong>PWMA</strong> <span>Motor A Speed (PWM 0-255)</span></div>
+              <div class="pin-item"><strong>AIN1 / AIN2</strong> <span>Motor A Direction Control</span></div>
+              <div class="pin-item"><strong>PWMB</strong> <span>Motor B Speed (PWM 0-255)</span></div>
+              <div class="pin-item"><strong>BIN1 / BIN2</strong> <span>Motor B Direction Control</span></div>
+              <div class="pin-item"><strong>VCC</strong> <span>Logic Power (2.7V – 5.5V)</span></div>
+            </div>
+            <div class="pin-column">
+              <h3>POWER &amp; OUTPUTS (Motors &amp; Battery)</h3>
+              <div class="pin-item"><strong>VM</strong> <span>Motor Supply Voltage (2.5V – 13.5V)</span></div>
+              <div class="pin-item"><strong>AO1 / AO2</strong> <span>Motor A Output Terminal</span></div>
+              <div class="pin-item"><strong>BO1 / BO2</strong> <span>Motor B Output Terminal</span></div>
+              <div class="pin-item"><strong>GND</strong> <span>Common Ground (Logic &amp; Motor)</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 5: Power Distribution -->
+        <section>
+          <span class="eyebrow">05 / POWER ARCHITECTURE</span>
+          <h2>Power Rails &amp;<br /><strong>Ground Isolation</strong></h2>
+          <div class="grid-2">
+            <div>
+              <h3>Dual Power Supply Setup</h3>
+              <p class="lead">Isolating micro-controller logic from motor voltage noise is essential for stability.</p>
+              <ul class="feature-list">
+                <li>
+                  VCC (Logic Power)<small>Connect to 3.3V or 5V from Arduino / ESP32 logic supply.</small>
+                </li>
+                <li>
+                  VM (Motor Power)<small>Connect to battery pack (6V, 7.4V LiPo, 12V). Never power from Arduino 5V pin!</small>
+                </li>
+                <li>
+                  Common Ground<small>GND of battery, motor driver, and microcontroller MUST be connected together.</small>
+                </li>
+              </ul>
+            </div>
+            <div class="warning-panel">
+              <span class="reference-tag">CRITICAL RULE</span>
+              <h3>Always Share Ground!</h3>
+              <p>Without a common GND reference between the Arduino and TB6612FNG, control signals will float, causing erratic motor jitter or failure to run.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 6: Truth Table Matrix -->
+        <section>
+          <span class="eyebrow">06 / CONTROL LOGIC</span>
+          <h2>H-Bridge Truth Table<br /><strong>Direction Matrix</strong></h2>
+          <p class="lead">Setting AIN1/AIN2 (or BIN1/BIN2) logic states controls motor direction and braking:</p>
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>IN1</th>
+                <th>IN2</th>
+                <th>PWM</th>
+                <th>STBY</th>
+                <th>Operating Mode</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="state-high">HIGH</td>
+                <td class="state-low">LOW</td>
+                <td class="state-pwm">HIGH/PWM</td>
+                <td class="state-high">HIGH</td>
+                <td>Forward Direction (CW)</td>
+              </tr>
+              <tr>
+                <td class="state-low">LOW</td>
+                <td class="state-high">HIGH</td>
+                <td class="state-pwm">HIGH/PWM</td>
+                <td class="state-high">HIGH</td>
+                <td>Reverse Direction (CCW)</td>
+              </tr>
+              <tr>
+                <td class="state-high">HIGH</td>
+                <td class="state-high">HIGH</td>
+                <td class="state-low">ANY</td>
+                <td class="state-high">HIGH</td>
+                <td>Short Brake (Active Brake)</td>
+              </tr>
+              <tr>
+                <td class="state-low">LOW</td>
+                <td class="state-low">LOW</td>
+                <td class="state-low">ANY</td>
+                <td class="state-high">HIGH</td>
+                <td>Stop / Coast (Freewheel)</td>
+              </tr>
+              <tr>
+                <td class="state-low">LOW</td>
+                <td class="state-low">X</td>
+                <td class="state-low">X</td>
+                <td class="state-low">LOW</td>
+                <td>Standby / Sleep Mode</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- SLIDE 7: Standby Pin (STBY) -->
+        <section>
+          <span class="eyebrow">07 / SAFETY &amp; SLEEP</span>
+          <h2>The STBY Pin<br /><strong>Enable &amp; Emergency Stop</strong></h2>
+          <div class="grid-2">
+            <div>
+              <div class="reference-card amber-border">
+                <span class="reference-tag">MUST BE PULLED HIGH</span>
+                <h3>STBY = HIGH to Run</h3>
+                <p>When STBY is HIGH, the internal H-Bridge FETs are enabled. You can connect STBY to an Arduino GPIO or directly to VCC.</p>
+              </div>
+              <div class="reference-card rose-border" style="margin-top: 1rem;">
+                <span class="reference-tag">LOW POWER SLEEP</span>
+                <h3>STBY = LOW for Standby</h3>
+                <p>Pulling STBY LOW immediately disables all outputs and enters ultra-low power standby mode (&lt;1µA current consumption).</p>
+              </div>
+            </div>
+            <div>
+              <div class="warning-panel">
+                <span class="reference-tag">COMMON TRAP</span>
+                <h3>Why isn't my motor turning?</h3>
+                <p>If STBY is left disconnected, floating, or LOW, the chip will stay in standby mode. All motor outputs will remain completely dead!</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 8: PWM Speed Control -->
+        <section>
+          <span class="eyebrow">08 / SPEED CONTROL</span>
+          <h2>PWM Speed Control<br /><strong>PWMA &amp; PWMB Pins</strong></h2>
+          <p class="lead">Modulating motor speed using Pulse-Width Modulation (0 to 255):</p>
+          <div class="reference-grid">
+            <div class="reference-card">
+              <span class="reference-tag">PWM = 0 (0% Duty)</span>
+              <h3>Zero Speed</h3>
+              <p>Motor outputs receive 0V. The motor remains stationary.</p>
+            </div>
+            <div class="reference-card">
+              <span class="reference-tag">PWM = 128 (50% Duty)</span>
+              <h3>Half Speed</h3>
+              <p>Outputs pulse at 50% duty cycle, delivering approximately half effective voltage.</p>
+            </div>
+            <div class="reference-card amber-border">
+              <span class="reference-tag">PWM = 255 (100% Duty)</span>
+              <h3>Full Speed</h3>
+              <p>Outputs driven continuously HIGH. Motor runs at full battery voltage.</p>
+            </div>
+            <div class="reference-card rose-border">
+              <span class="reference-tag">MINIMUM STALL THRESHOLD</span>
+              <h3>Deadzone Voltage</h3>
+              <p>DC motors require a minimum PWM threshold (typically 40–60) to overcome mechanical friction.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 9: Arduino Setup Code -->
+        <section>
+          <span class="eyebrow">09 / CODE IMPLEMENTATION</span>
+          <h2>Arduino Pin Setup &amp;<br /><strong>Initialization Code</strong></h2>
+          <p class="lead">Configuring GPIO control pins for Dual Motor Driver A &amp; B:</p>
+          <pre><code class="language-cpp">// Pin Definitions for Motor Driver A & B
+
+const int AIN1 = 4;   // Motor A Direction 1
+const int AIN2 = 5;   // Motor A Direction 2
+const int PWMA = 6;   // Motor A Speed (PWM Pin)
+
+const int BIN1 = 7;   // Motor B Direction 1
+const int BIN2 = 8;   // Motor B Direction 2
+const int PWMB = 9;   // Motor B Speed (PWM Pin)
+
+const int STBY = 3;   // Standby Pin
+
+void setup() {
+  pinMode(AIN1, OUTPUT); pinMode(AIN2, OUTPUT); pinMode(PWMA, OUTPUT);
+  pinMode(BIN1, OUTPUT); pinMode(BIN2, OUTPUT); pinMode(PWMB, OUTPUT);
+  pinMode(STBY, OUTPUT);
+
+  digitalWrite(STBY, HIGH); // Enable driver out of standby
+}</code></pre>
+        </section>
+
+        <!-- SLIDE 10: Custom Motor Functions Code -->
+        <section>
+          <span class="eyebrow">10 / CODE IMPLEMENTATION</span>
+          <h2>Motor Control<br /><strong>Helper Functions</strong></h2>
+          <p class="lead">Clean C++ functions for directional drive and short braking:</p>
+          <pre><code class="language-cpp">// Drive Motor A (dir: 1 = Forward, -1 = Reverse, 0 = Brake)
+
+void driveMotorA(int speed, int dir) {
+  if (dir == 1) {        // Forward
+    digitalWrite(AIN1, HIGH);
+    digitalWrite(AIN2, LOW);
+  } else if (dir == -1) { // Reverse
+    digitalWrite(AIN1, LOW);
+    digitalWrite(AIN2, HIGH);
+  } else {               // Short Brake
+    digitalWrite(AIN1, HIGH);
+    digitalWrite(AIN2, HIGH);
+  }
+  analogWrite(PWMA, constrain(abs(speed), 0, 255));
+}</code></pre>
+        </section>
+
+        <!-- SLIDE 11: Complete Dual Motor Sketch -->
+        <section>
+          <span class="eyebrow">11 / CODE IMPLEMENTATION</span>
+          <h2>Differential Drive<br /><strong>Differential Robot Sketch</strong></h2>
+          <p class="lead">Complete autonomous motion loop for a 2-wheeled robot:</p>
+          <pre><code class="language-cpp">// Main Robot Motion Loop
+
+void loop() {
+  driveMotorA(200, 1);  // Move Forward
+  driveMotorB(200, 1);
+  delay(2000);
+
+  driveMotorA(150, -1); // Pivot Right
+  driveMotorB(150, 1);
+  delay(800);
+
+  driveMotorA(0, 0);   // Short Brake
+  driveMotorB(0, 0);
+  delay(1000);
+}</code></pre>
+        </section>
+
+        <!-- SLIDE 12: Protection & Hardware Best Practices -->
+        <section>
+          <span class="eyebrow">12 / ENGINEERING RULES</span>
+          <h2>4 Gold Rules of<br /><strong>Motor Driver Wiring</strong></h2>
+          <div class="cheat-grid">
+            <div>
+              <span class="reference-tag">RULE 1</span>
+              <h3>Decoupling Capacitors</h3>
+              <p>Place a 10µF to 100µF electrolytic capacitor across VM and GND close to the board to absorb motor voltage spikes!</p>
+            </div>
+            <div>
+              <span class="reference-tag">RULE 2</span>
+              <h3>Current Limits</h3>
+              <p>Keep continuous motor current under 1.2A per channel. Stall current of cheap DC motors can exceed 2A!</p>
+            </div>
+            <div>
+              <span class="reference-tag">RULE 3</span>
+              <h3>Flyback Diodes</h3>
+              <p>TB6612FNG has internal flyback diodes. Avoid adding external diodes unless driving massive inductive loads.</p>
+            </div>
+            <div>
+              <span class="reference-tag">RULE 4</span>
+              <h3>Never Reverse Polarity</h3>
+              <p>Connecting VM and GND backwards will instantly burn the MOSFET driver IC! Always double-check battery wiring.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 13: Final Summary Slide -->
+        <section class="final-slide">
+          <div>
+            <span class="eyebrow">13 / READY TO DRIVE</span>
+            <h2>Power.<br /><strong>Control. Move.</strong></h2>
+            <p class="lead">
+              You now have full mastery of the TB6612FNG Dual Motor Driver for your ACTUATOR 26 robotics builds.
+            </p>
+            <p class="mono small">TB6612FNG · H-BRIDGE · ACTUATOR 26</p>
+          </div>
+          <div class="stamp">LET'S<br />DRIVE IT</div>
+        </section>
+
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

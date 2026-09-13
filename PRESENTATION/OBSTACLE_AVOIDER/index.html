@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070e17" />
+    <title>Ultrasonic Obstacle Avoider Field Notes | ACTUATOR 26</title>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="brand-mark" aria-label="ROBOCEK logo">
+        <img src="/ROBOCEK%20White%20Logo.png" alt="ROBOCEK" />
+      </div>
+
+      <div class="slides">
+
+        <!-- SLIDE 1: Title Slide -->
+        <section class="title-slide">
+          <span class="eyebrow">01 / AUTONOMOUS ROBOTICS</span>
+          <h1>Ultrasonic Obstacle<br /><strong>Avoider Robot</strong></h1>
+          <p class="lead subtitle">
+            Non-Contact Distance Sensing &amp; Spatial Avoidance with ESP32.
+          </p>
+          <div class="meta">
+            <span>ACTUATOR 26</span><span>FIELD NOTES / 2026</span>
+          </div>
+          <div class="corner-mark" aria-hidden="true"></div>
+        </section>
+
+        <!-- SLIDE 2: System Architecture -->
+        <section>
+          <span class="eyebrow">02 / SYSTEM ARCHITECTURE</span>
+          <h2>4 Core Modules of<br /><strong>an Obstacle Avoider</strong></h2>
+          <p class="lead">Real-time distance measurement drives autonomous path clearing:</p>
+          <div class="reference-grid">
+            <div class="reference-card amber-border">
+              <span class="reference-tag">BRAIN</span>
+              <h3>ESP32 Microcontroller</h3>
+              <p>Triggers 40kHz sonic pulses, measures microsecond echo pulse widths, and computes distance in centimeters.</p>
+            </div>
+            <div class="reference-card emerald-border">
+              <span class="reference-tag">PERCEPTION</span>
+              <h3>Dual HC-SR04 Sensors</h3>
+              <p>Left and Right ultrasonic modules provide 2D spatial awareness up to 400cm with 3mm precision.</p>
+            </div>
+            <div class="reference-card">
+              <span class="reference-tag">ACTUATION</span>
+              <h3>TB6612FNG Driver</h3>
+              <p>Dual H-Bridge MOSFET driver controlling left and right DC motors to pivot away from obstacles.</p>
+            </div>
+            <div class="reference-card rose-border">
+              <span class="reference-tag">POWER</span>
+              <h3>Isolated LiPo Rail</h3>
+              <p>Delivers clean logic power to ESP32 and high-current motor supply (VM) to avoid brownouts.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 3: Circuit Diagram Placeholder -->
+        <section>
+          <span class="eyebrow">03 / SCHEMATIC DIAGRAM</span>
+          <h2>Circuit Diagram &amp;<br /><strong>Hardware Interconnects</strong></h2>
+          
+          <!-- Circuit Diagram Placeholder Box -->
+          <div class="circuit-placeholder">
+            <div class="circuit-badge">SCHEMATIC PLACEHOLDER</div>
+            <h3>ESP32 + Dual HC-SR04 + TB6612FNG Driver</h3>
+            <p>Insert final schematic / Fritzing wiring diagram here. Showing Trig/Echo pins, motor driver inputs, and battery rails.</p>
+            
+            <div class="circuit-specs">
+              <div class="circuit-spec-item">Left Ultrasonic <span>Trig: 32 | Echo: 35</span></div>
+              <div class="circuit-spec-item">Right Ultrasonic <span>Trig: 21 | Echo: 22</span></div>
+              <div class="circuit-spec-item">TB6612FNG Driver <span>STBY: 23 | PWM: 33/25</span></div>
+              <div class="circuit-spec-item">Threshold Distance <span>20.0 cm</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 4: Ultrasonic Principle -->
+        <section>
+          <span class="eyebrow">04 / SENSOR PRINCIPLE</span>
+          <h2>HC-SR04 Ranging<br /><strong>Sonic Echo Principle</strong></h2>
+          <p class="lead">Computing target distance from sound propagation velocity (343 m/s):</p>
+          <div class="grid-2">
+            <div>
+              <ul class="feature-list">
+                <li>
+                  Trigger Pulse <small>Send 10µs HIGH pulse on <code>RC_US_TRIG</code> to fire 8-cycle 40kHz sonic burst.</small>
+                </li>
+                <li>
+                  Echo Measurement <small><code>pulseIn(echoPin, HIGH)</code> measures microsecond travel duration.</small>
+                </li>
+              </ul>
+              
+              <!-- Clean HTML Formula Box -->
+              <div class="formula-box" style="margin-top: 1rem;">
+                <span class="var">Distance (cm)</span> = 
+                <div class="fraction">
+                  <span class="num">Duration (µs) × 0.0343</span>
+                  <span class="den">2</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <pre><code class="language-cpp">// Distance Measurement Helper Function
+
+float measureDistance(int trigPin, int echoPin) {
+    digitalWrite(trigPin, LOW);
+    delayMicroseconds(2);
+    digitalWrite(trigPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trigPin, LOW);
+
+    long duration = pulseIn(echoPin, HIGH);
+    return (duration * 0.0343) / 2; // Convert to cm
+}</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 5: Hardware Pin Mapping -->
+        <section>
+          <span class="eyebrow">05 / PIN MAPPING</span>
+          <h2>ESP32 Pinout Assignment<br /><strong>Obstacle Avoider Config</strong></h2>
+          <p class="lead">Exact GPIO assignments configured in <code>obstacle_avoider/src/main.cpp</code>:</p>
+          <div class="pin-grid">
+            <div class="pin-column">
+              <h3>ULTRASONIC SENSORS</h3>
+              <div class="pin-item"><strong>RC_US_LEFT_TRIG</strong> <span>GPIO 32 (Output)</span></div>
+              <div class="pin-item"><strong>RC_US_LEFT_ECHO</strong> <span>GPIO 35 (Input)</span></div>
+              <div class="pin-item"><strong>RC_US_RIGHT_TRIG</strong> <span>GPIO 21 (Output)</span></div>
+              <div class="pin-item"><strong>RC_US_RIGHT_ECHO</strong> <span>GPIO 22 (Input)</span></div>
+              <div class="pin-item"><strong>THRESHOLD</strong> <span>20.0 cm</span></div>
+            </div>
+            <div class="pin-column">
+              <h3>MOTOR DRIVER PINS</h3>
+              <div class="pin-item"><strong>RC_MOTOR_STBY</strong> <span>GPIO 23 (Standby Enable)</span></div>
+              <div class="pin-item"><strong>RC_LEFT_PWM / IN1 / IN2</strong> <span>GPIO 33 / 18 / 19</span></div>
+              <div class="pin-item"><strong>RC_RIGHT_PWM / IN1 / IN2</strong> <span>GPIO 25 / 26 / 27</span></div>
+              <div class="pin-item"><strong>SPEED</strong> <span>100 (PWM Duty Cycle)</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 6: Obstacle Avoidance Matrix -->
+        <section>
+          <span class="eyebrow">06 / CONTROL ALGORITHM</span>
+          <h2>Obstacle Avoidance<br /><strong>Spatial Decision Matrix</strong></h2>
+          <p class="lead">Dual distance readings drive spatial navigation choices:</p>
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Left Distance</th>
+                <th>Right Distance</th>
+                <th>Left Motor</th>
+                <th>Right Motor</th>
+                <th>Robot Movement</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="state-high">&gt; 20 cm (Clear)</td>
+                <td class="state-high">&gt; 20 cm (Clear)</td>
+                <td class="state-pwm">FORWARD (SPEED 100)</td>
+                <td class="state-pwm">FORWARD (SPEED 100)</td>
+                <td>Move Straight Ahead</td>
+              </tr>
+              <tr>
+                <td class="state-low">&lt; 20 cm (Blocked)</td>
+                <td class="state-high">&gt; 20 cm (Clear)</td>
+                <td class="state-pwm">FORWARD (SPEED 100)</td>
+                <td class="state-low">STOP (0 PWM)</td>
+                <td>Turn Right (Avoid Left Wall)</td>
+              </tr>
+              <tr>
+                <td class="state-high">&gt; 20 cm (Clear)</td>
+                <td class="state-low">&lt; 20 cm (Blocked)</td>
+                <td class="state-low">STOP (0 PWM)</td>
+                <td class="state-pwm">FORWARD (SPEED 100)</td>
+                <td>Turn Left (Avoid Right Wall)</td>
+              </tr>
+              <tr>
+                <td class="state-low">&lt; 20 cm (Blocked)</td>
+                <td class="state-low">&lt; 20 cm (Blocked)</td>
+                <td class="state-low">STOP (0 PWM)</td>
+                <td class="state-low">STOP (0 PWM)</td>
+                <td>Emergency Stop / Dead End</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- SLIDE 7: Code Breakdown - Setup -->
+        <section>
+          <span class="eyebrow">07 / CODE BREAKDOWN</span>
+          <h2>Initialization &amp;<br /><strong>Ultrasonic Setup Code</strong></h2>
+          <p class="lead">Configuring Trig/Echo pins &amp; motor driver enable in <code>setup()</code>:</p>
+          <pre><code class="language-cpp">// setup() from obstacle_avoider/src/main.cpp
+
+void setup() {
+    Serial.begin(115200);
+    pinMode(RC_MOTOR_STBY, OUTPUT);
+    pinMode(RC_LEFT_PWM, OUTPUT);   pinMode(RC_LEFT_IN1, OUTPUT);   pinMode(RC_LEFT_IN2, OUTPUT);
+    pinMode(RC_RIGHT_PWM, OUTPUT);  pinMode(RC_RIGHT_IN1, OUTPUT);  pinMode(RC_RIGHT_IN2, OUTPUT);
+
+    pinMode(RC_US_LEFT_TRIG, OUTPUT);  pinMode(RC_US_LEFT_ECHO, INPUT);
+    pinMode(RC_US_RIGHT_TRIG, OUTPUT); pinMode(RC_US_RIGHT_ECHO, INPUT);
+
+    digitalWrite(RC_MOTOR_STBY, HIGH); // Enable TB6612FNG Driver
+}</code></pre>
+        </section>
+
+        <!-- SLIDE 8: Code Breakdown - Sampling -->
+        <section>
+          <span class="eyebrow">08 / CODE BREAKDOWN</span>
+          <h2>Dual Distance Sampling<br /><strong>&amp; Serial Telemetry</strong></h2>
+          <p class="lead">Sampling dual ultrasonic sensors in <code>loop()</code>:</p>
+          <pre><code class="language-cpp">// Sampling Dual Distances in loop()
+
+void loop() {
+    float leftDistance = measureDistance(RC_US_LEFT_TRIG, RC_US_LEFT_ECHO);
+    float rightDistance = measureDistance(RC_US_RIGHT_TRIG, RC_US_RIGHT_ECHO);
+
+    Serial.print("Left: ");  Serial.print(leftDistance);
+    Serial.print(" | Right: "); Serial.println(rightDistance);
+
+    // Spatial Avoidance Logic Follows...
+}</code></pre>
+        </section>
+
+        <!-- SLIDE 9: Code Breakdown - Avoidance Logic -->
+        <section>
+          <span class="eyebrow">09 / CODE BREAKDOWN</span>
+          <h2>Spatial Avoidance<br /><strong>Decision Tree Code</strong></h2>
+          <p class="lead">Executing directional avoidance based on distance thresholds:</p>
+          <pre><code class="language-cpp">    if (leftDistance &lt; THRESHOLD_DISTANCE &amp;&amp; rightDistance &lt; THRESHOLD_DISTANCE) {
+        // Both blocked -> Stop
+        digitalWrite(RC_LEFT_IN1, LOW);  digitalWrite(RC_LEFT_IN2, LOW);  analogWrite(RC_LEFT_PWM, 0);
+        digitalWrite(RC_RIGHT_IN1, LOW); digitalWrite(RC_RIGHT_IN2, LOW); analogWrite(RC_RIGHT_PWM, 0);
+    } else if (leftDistance &lt; THRESHOLD_DISTANCE) {
+        // Left blocked -> Turn Right
+        digitalWrite(RC_LEFT_IN1, HIGH); digitalWrite(RC_LEFT_IN2, LOW);  analogWrite(RC_LEFT_PWM, SPEED);
+        digitalWrite(RC_RIGHT_IN1, LOW);  digitalWrite(RC_RIGHT_IN2, LOW);  analogWrite(RC_RIGHT_PWM, 0);
+    } else if (rightDistance &lt; THRESHOLD_DISTANCE) {
+        // Right blocked -> Turn Left
+        digitalWrite(RC_LEFT_IN1, LOW);   digitalWrite(RC_LEFT_IN2, LOW);  analogWrite(RC_LEFT_PWM, 0);
+        digitalWrite(RC_RIGHT_IN1, HIGH); digitalWrite(RC_RIGHT_IN2, LOW); analogWrite(RC_RIGHT_PWM, SPEED);
+    } else {
+        // Clear -> Move Forward
+        digitalWrite(RC_LEFT_IN1, HIGH);  digitalWrite(RC_LEFT_IN2, LOW);  analogWrite(RC_LEFT_PWM, SPEED);
+        digitalWrite(RC_RIGHT_IN1, HIGH); digitalWrite(RC_RIGHT_IN2, LOW); analogWrite(RC_RIGHT_PWM, SPEED);
+    }
+    delay(100);</code></pre>
+        </section>
+
+        <!-- SLIDE 10: Threshold Tuning & Calibration -->
+        <section>
+          <span class="eyebrow">10 / HARDWARE TUNING</span>
+          <h2>Threshold Tuning &amp;<br /><strong>Sensor Calibration</strong></h2>
+          <div class="reference-grid">
+            <div class="reference-card amber-border">
+              <span class="reference-tag">DISTANCE THRESHOLD</span>
+              <h3>20.0 cm Threshold</h3>
+              <p>Provides optimal braking distance at 100 PWM motor speed. Increase threshold for faster speeds.</p>
+            </div>
+            <div class="reference-card emerald-border">
+              <span class="reference-tag">SENSOR ANGLE</span>
+              <h3>15° Toe-Out Angle</h3>
+              <p>Slightly angling left and right sensors outward expands forward field-of-view for corner detection.</p>
+            </div>
+            <div class="reference-card">
+              <span class="reference-tag">TIMEOUT PROTECTION</span>
+              <h3>pulseIn Timeout</h3>
+              <p>If no reflection returns within 30ms, <code>pulseIn</code> returns 0 to prevent code freezing.</p>
+            </div>
+            <div class="reference-card rose-border">
+              <span class="reference-tag">GPIO 35 INPUT ONLY</span>
+              <h3>ESP32 Pin Constraint</h3>
+              <p>GPIO 35 is an input-only pin without internal pull-ups. Ideal for HC-SR04 Echo output signal.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 11: Troubleshooting & Field Notes -->
+        <section>
+          <span class="eyebrow">11 / TROUBLESHOOTING</span>
+          <h2>4 Ultrasonic<br /><strong>Field Diagnostics</strong></h2>
+          <div class="cheat-grid">
+            <div>
+              <span class="reference-tag">ISSUE 1</span>
+              <h3>Soft Surface Absorption</h3>
+              <p>Curtains or foam absorb 40kHz sound waves. Test obstacle avoidance against rigid surfaces.</p>
+            </div>
+            <div>
+              <span class="reference-tag">ISSUE 2</span>
+              <h3>Crosstalk &amp; Interference</h3>
+              <p>Triggering left and right sensors simultaneously can cause acoustic crosstalk. Space measurements out.</p>
+            </div>
+            <div>
+              <span class="reference-tag">ISSUE 3</span>
+              <h3>5V to 3.3V Echo Level Shift</h3>
+              <p>HC-SR04 Echo pin outputs 5V. Use a resistor divider (1k/2k) when connecting Echo to ESP32 3.3V GPIOs.</p>
+            </div>
+            <div>
+              <span class="reference-tag">ISSUE 4</span>
+              <h3>Power Supply Noise</h3>
+              <p>Motor electrical noise on VM rail can disrupt ultrasonic pulse timing. Add 100µF decoupling capacitor across VM/GND.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 12: Final Summary Slide -->
+        <section class="final-slide">
+          <div>
+            <span class="eyebrow">12 / READY TO AVOID</span>
+            <h2>Sense.<br /><strong>Decide. Avoid.</strong></h2>
+            <p class="lead">
+              Your ESP32 Ultrasonic Obstacle Avoider is configured for spatial 2D navigation.
+            </p>
+            <p class="mono small">HC-SR04 · ESP32 · ACTUATOR 26</p>
+          </div>
+          <div class="stamp">LET'S<br />AVOID IT</div>
+        </section>
+
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

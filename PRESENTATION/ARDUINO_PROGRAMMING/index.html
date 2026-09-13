@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070e17" />
+    <title>Arduino Programming Field Notes | ACTUATOR 26</title>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="brand-mark" aria-label="ROBOCEK logo">
+        <img src="/ROBOCEK%20White%20Logo.png" alt="ROBOCEK" />
+      </div>
+
+      <div class="slides">
+
+        <!-- SLIDE 1: Title Slide -->
+        <section class="title-slide">
+          <span class="eyebrow">01 / EMBEDDED SOFTWARE</span>
+          <h1>Arduino<br /><strong>Programming</strong></h1>
+          <p class="lead subtitle">
+            From Bare-Metal C/C++ Logic to Autonomous Hardware Control.
+          </p>
+          <div class="meta">
+            <span>ACTUATOR 26</span><span>FIELD NOTES / 2026</span>
+          </div>
+          <div class="corner-mark" aria-hidden="true"></div>
+        </section>
+
+        <!-- SLIDE 2: Sketch Architecture - Theory -->
+        <section>
+          <span class="eyebrow">02 / SKETCH ARCHITECTURE</span>
+          <h2>The Execution Model<br /><strong>setup() &amp; loop()</strong></h2>
+          <p class="lead">
+            Every Arduino sketch relies on two core lifecycle functions. The microcontroller initializes hardware once, then enters an infinite execution loop.
+          </p>
+          <div class="reference-grid">
+            <div class="reference-card amber-border">
+              <span class="reference-tag">STEP 1 · RUNS ONCE</span>
+              <h3>setup()</h3>
+              <p>Configures GPIO pin directions, sets up serial communications, initializes sensors, and allocates buffers on power-up.</p>
+            </div>
+            <div class="reference-card">
+              <span class="reference-tag">STEP 2 · REPEATS FOREVER</span>
+              <h3>loop()</h3>
+              <p>Contains main execution logic. Continuously evaluates conditions, reads sensors, and updates outputs until powered off.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 3: Sketch Architecture - Code (Screen-Fit Fix) -->
+        <section>
+          <span class="eyebrow">03 / SKETCH ARCHITECTURE</span>
+          <h2>Standard Sketch<br /><strong>Structure Code</strong></h2>
+          <p class="lead">The fundamental skeleton of every embedded C++ application:</p>
+          <pre><code class="language-cpp">// Standard Arduino Sketch Skeleton
+
+void setup() {
+  pinMode(LED_BUILTIN, OUTPUT); // Configure LED output pin
+  Serial.begin(115200);         // Start serial UART at 115200 baud
+}
+
+void loop() {
+  digitalWrite(LED_BUILTIN, HIGH); // Turn LED ON
+  delay(500);                      // Wait 500ms
+  digitalWrite(LED_BUILTIN, LOW);  // Turn LED OFF
+  delay(500);                      // Wait 500ms
+}</code></pre>
+        </section>
+
+        <!-- SLIDE 4: Data Types & RAM Optimization -->
+        <section>
+          <span class="eyebrow">04 / DATA TYPES &amp; RAM</span>
+          <h2>Choosing the Right<br /><strong>Data Type</strong></h2>
+          <p class="lead">Microcontrollers have limited SRAM. Selecting optimal variable types saves precious RAM.</p>
+          <div class="bus-table">
+            <div class="bus-head">Type</div>
+            <div class="bus-head">Size</div>
+            <div class="bus-head">Value Range</div>
+            <div class="bus-head">Best Used For</div>
+            
+            <div class="value">bool</div>
+            <div>1 byte</div>
+            <div>true (1) or false (0)</div>
+            <div>Digital states, flag conditions</div>
+
+            <div class="value">uint8_t / byte</div>
+            <div>1 byte</div>
+            <div>0 to 255</div>
+            <div>Pin IDs, 8-bit PWM values</div>
+
+            <div class="value">int</div>
+            <div>2 bytes</div>
+            <div>-32,768 to 32,767</div>
+            <div>Sensor counts, general math</div>
+
+            <div class="value">unsigned long</div>
+            <div>4 bytes</div>
+            <div>0 to 4,294,967,295</div>
+            <div>Timers (`millis()`, `micros()`)</div>
+
+            <div class="value">float</div>
+            <div>4 bytes</div>
+            <div>±3.4e38 (approx 6 decimals)</div>
+            <div>Analog calculations, angles</div>
+          </div>
+        </section>
+
+        <!-- SLIDE 5: Digital I/O Control - Concepts -->
+        <section>
+          <span class="eyebrow">05 / DIGITAL HARDWARE</span>
+          <h2>Reading &amp; Writing<br /><strong>Digital Signals</strong></h2>
+          <p class="lead">Core functions to interface with digital sensors, switches, and relays.</p>
+          <div class="reference-grid">
+            <div class="reference-card">
+              <span class="reference-tag">CONFIGURE</span>
+              <h3>pinMode(pin, mode)</h3>
+              <p>Sets GPIO pin direction to <code>INPUT</code>, <code>OUTPUT</code>, or <code>INPUT_PULLUP</code>.</p>
+            </div>
+            <div class="reference-card">
+              <span class="reference-tag">WRITE</span>
+              <h3>digitalWrite(pin, state)</h3>
+              <p>Drives output pin to <code>HIGH</code> (3.3V/5V) or <code>LOW</code> (0V).</p>
+            </div>
+            <div class="reference-card">
+              <span class="reference-tag">READ</span>
+              <h3>digitalRead(pin)</h3>
+              <p>Reads logical level (<code>HIGH</code> or <code>LOW</code>) of a pin.</p>
+            </div>
+            <div class="reference-card amber-border">
+              <span class="reference-tag">PRO TIP</span>
+              <h3>INPUT_PULLUP</h3>
+              <p>Engages internal resistor. Keeps pin HIGH until connected to ground by a switch.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 6: Digital I/O Control - Code (Screen-Fit Fix) -->
+        <section>
+          <span class="eyebrow">06 / DIGITAL HARDWARE</span>
+          <h2>Digital Reading &amp;<br /><strong>Control Code</strong></h2>
+          <p class="lead">Reading a push-button with internal pull-up and controlling an output LED:</p>
+          <pre><code class="language-cpp">const int BUTTON_PIN = 2;
+const int LED_PIN = 13;
+
+void setup() {
+  pinMode(BUTTON_PIN, INPUT_PULLUP); // Active-LOW button
+  pinMode(LED_PIN, OUTPUT);
+}
+
+void loop() {
+  int buttonState = digitalRead(BUTTON_PIN);
+  if (buttonState == LOW) {
+    digitalWrite(LED_PIN, HIGH);  // Button Pressed -> LED ON
+  } else {
+    digitalWrite(LED_PIN, LOW);   // Released -> LED OFF
+  }
+}</code></pre>
+        </section>
+
+        <!-- SLIDE 7: Analog Signals & ADC (Math Formula + Screen-Fit Fix) -->
+        <section>
+          <span class="eyebrow">07 / ANALOG SIGNALS</span>
+          <h2>Analog Inputs &amp;<br /><strong>ADC Conversion</strong></h2>
+          <div class="grid-2">
+            <div>
+              <p class="lead" style="margin-bottom: 0.4rem;">Converts continuous real-world voltages into digital readings (0–1023 for 10-bit ADC).</p>
+              
+              <!-- Clean HTML/CSS Formatted Math Formula Box -->
+              <div class="formula-box">
+                <span class="var">V<sub>in</sub></span> = 
+                <div class="fraction">
+                  <span class="num">ADC Reading × V<sub>ref</sub></span>
+                  <span class="den">1023</span>
+                </div>
+              </div>
+
+              <p class="small" style="color: var(--muted); margin-top: 0.3rem;">For 5V reference: V<sub>in</sub> = rawValue * (5.0 / 1023.0)</p>
+            </div>
+            <div>
+              <pre><code class="language-cpp">// Read Voltage from Potentiometer
+
+const int POT_PIN = A0;
+
+void setup() {
+  Serial.begin(115200);
+}
+
+void loop() {
+  int rawValue = analogRead(POT_PIN);
+  float voltage = rawValue * (5.0 / 1023.0);
+  Serial.print("Voltage: ");
+  Serial.println(voltage);
+  delay(100);
+}</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 8: PWM Signals -->
+        <section>
+          <span class="eyebrow">08 / PWM OUTPUT</span>
+          <h2>Pulse-Width Modulation<br /><strong>Speed &amp; Dimming</strong></h2>
+          <div class="grid-2">
+            <div>
+              <p class="lead">Simulating analog output using high-frequency digital pulses.</p>
+              <ul class="feature-list">
+                <li>
+                  8-Bit Resolution <small>Accepts values from 0 (0% Duty) to 255 (100% Duty).</small>
+                </li>
+                <li>
+                  Hardware Control <small>DC motor speed control, LED dimming, buzzer tones.</small>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <pre><code class="language-cpp">// Fade LED brightness / Motor speed with PWM
+
+const int PWM_PIN = 9;
+
+void setup() {
+  pinMode(PWM_PIN, OUTPUT);
+}
+
+void loop() {
+  analogWrite(PWM_PIN, 128); // 50% Duty Cycle
+}</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 9: Real-Time Timing - Concept -->
+        <section>
+          <span class="eyebrow">09 / REAL-TIME TIMING</span>
+          <h2>Ditch delay()<br /><strong>Master millis()</strong></h2>
+          <div class="warning-panel">
+            <span class="reference-tag">THE HAZARD</span>
+            <h3>delay() Freezes the CPU</h3>
+            <p>While <code>delay(1000)</code> runs, the microcontroller is locked. It CANNOT sample sensors, process commands, or trigger emergency stops!</p>
+          </div>
+          <div class="reference-card amber-border" style="margin-top: 1rem;">
+            <span class="reference-tag">THE SOLUTION</span>
+            <h3>millis() Non-Blocking Timer</h3>
+            <p>Returns elapsed milliseconds since power-on. Compare timestamps to run concurrent tasks smoothly.</p>
+          </div>
+        </section>
+
+        <!-- SLIDE 10: Real-Time Timing - Code (Screen-Fit Fix) -->
+        <section>
+          <span class="eyebrow">10 / REAL-TIME TIMING</span>
+          <h2>Non-Blocking Multitasking<br /><strong>Timer Code</strong></h2>
+          <p class="lead">Executing periodic tasks without blocking CPU responsiveness:</p>
+          <pre><code class="language-cpp">// Blink LED every 500ms without delay()
+
+unsigned long prevMillis = 0;
+const long INTERVAL = 500; // Time interval in ms
+bool ledState = LOW;
+
+void loop() {
+  unsigned long currentMillis = millis();
+
+  if (currentMillis - prevMillis &gt;= INTERVAL) {
+    prevMillis = currentMillis;
+    ledState = !ledState;
+    digitalWrite(LED_PIN, ledState);
+  }
+  // Other tasks (sensors, motors) run continuously!
+}</code></pre>
+        </section>
+
+        <!-- SLIDE 11: Serial UART - Concepts -->
+        <section>
+          <span class="eyebrow">11 / UART COMMUNICATION</span>
+          <h2>Talk to your Machine<br /><strong>Serial UART</strong></h2>
+          <p class="lead">Hardware serial communication for debugging, telemetry, and external control.</p>
+          <div class="cheat-grid">
+            <div>
+              <span class="reference-tag">INIT</span>
+              <h3>Serial.begin(115200)</h3>
+              <p>Initializes UART peripheral at specified baud rate (e.g. 9600, 115200).</p>
+            </div>
+            <div>
+              <span class="reference-tag">SEND</span>
+              <h3>Serial.println(data)</h3>
+              <p>Transmits ASCII data to Host PC or Bluetooth device with newline.</p>
+            </div>
+            <div>
+              <span class="reference-tag">CHECK</span>
+              <h3>Serial.available()</h3>
+              <p>Returns the number of unread bytes sitting in the RX buffer.</p>
+            </div>
+            <div>
+              <span class="reference-tag">READ</span>
+              <h3>Serial.read()</h3>
+              <p>Pulls the oldest single byte from the RX buffer.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 12: Serial UART - Code (Screen-Fit Fix) -->
+        <section>
+          <span class="eyebrow">12 / UART COMMUNICATION</span>
+          <h2>Serial Command<br /><strong>Receiver Code</strong></h2>
+          <p class="lead">Parsing incoming character commands from Serial monitor or Bluetooth:</p>
+          <pre><code class="language-cpp">// Serial Command Parsing Example
+
+void setup() {
+  Serial.begin(115200);
+}
+
+void loop() {
+  if (Serial.available() &gt; 0) {
+    char command = Serial.read();
+    if (command == 'F') {
+      driveForward();
+      Serial.println("STATUS: Moving Forward");
+    } else if (command == 'S') {
+      stopMotors();
+      Serial.println("STATUS: Motors Stopped");
+    }
+  }
+}</code></pre>
+        </section>
+
+        <!-- SLIDE 13: Hardware Interrupts - Concepts -->
+        <section>
+          <span class="eyebrow">13 / ASYNCHRONOUS EVENTS</span>
+          <h2>Hardware Interrupts<br /><strong>Zero-Latency Response</strong></h2>
+          <p class="lead">Instant hardware-triggered callbacks that preempt normal code execution.</p>
+          <div class="reference-grid">
+            <div class="reference-card rose-border">
+              <span class="reference-tag">TRIGGER MODES</span>
+              <h3>RISING / FALLING / CHANGE</h3>
+              <p>Interrupt triggers immediately on pin signal transitions without polling in <code>loop()</code>.</p>
+            </div>
+            <div class="reference-card amber-border">
+              <span class="reference-tag">KEYWORD</span>
+              <h3>volatile</h3>
+              <p>Prevents C++ compiler from caching variables shared between ISR and main loop in registers.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 14: Hardware Interrupts - Code (Screen-Fit Fix) -->
+        <section>
+          <span class="eyebrow">14 / ASYNCHRONOUS EVENTS</span>
+          <h2>Interrupt Service Routine<br /><strong>(ISR) Code</strong></h2>
+          <p class="lead">Emergency Stop Button handled with zero latency:</p>
+          <pre><code class="language-cpp">const byte INTERRUPT_PIN = 2;
+volatile bool emergencyStop = false;
+
+void handleEmergency() { // ISR Callback - Must be short & fast!
+  emergencyStop = true;
+}
+
+void setup() {
+  pinMode(INTERRUPT_PIN, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), handleEmergency, FALLING);
+}
+
+void loop() {
+  if (emergencyStop) {
+    cutMotorPower();
+  }
+}</code></pre>
+        </section>
+
+        <!-- SLIDE 15: Modular Code & Functions -->
+        <section>
+          <span class="eyebrow">15 / MODULAR CODE</span>
+          <h2>Custom Functions &amp;<br /><strong>Reference Passing</strong></h2>
+          <p class="lead">Organizing complex sketches into clean, reusable logic blocks.</p>
+          <div class="reference-grid">
+            <div class="reference-card">
+              <span class="reference-tag">PASS BY VALUE</span>
+              <h3>func(int val)</h3>
+              <p>Creates a local copy of parameter. Safe for basic configuration numbers.</p>
+            </div>
+            <div class="reference-card amber-border">
+              <span class="reference-tag">PASS BY REFERENCE</span>
+              <h3>func(int &amp;val)</h3>
+              <p>Passes memory address directly. Allows functions to modify variables in caller scope.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 16: Modular Code - Code Example (Screen-Fit Fix) -->
+        <section>
+          <span class="eyebrow">16 / MODULAR CODE</span>
+          <h2>HC-SR04 Ultrasonic<br /><strong>Sensor Module Code</strong></h2>
+          <p class="lead">Encapsulating pulse measurement logic inside a helper function:</p>
+          <pre><code class="language-cpp">// Distance Calculation Helper Function
+
+int getDistanceCM(int trigPin, int echoPin) {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  long duration = pulseIn(echoPin, HIGH);
+  return duration * 0.034 / 2; // Compute CM distance
+}
+
+void loop() {
+  int distance = getDistanceCM(9, 10);
+  if (distance &lt; 15) {
+    avoidObstacle();
+  }
+}</code></pre>
+        </section>
+
+        <!-- SLIDE 17: Hardware Interfacing -->
+        <section>
+          <span class="eyebrow">17 / HARDWARE INTERFACING</span>
+          <h2>Actuators, Motors &amp;<br /><strong>Sensor Buses</strong></h2>
+          <div class="reference-grid">
+            <div class="reference-card">
+              <span class="reference-tag">MOTOR DRIVERS</span>
+              <h3>L298N / TB6612</h3>
+              <p>H-Bridge drivers require direction control pins + PWM pins for speed regulation.</p>
+            </div>
+            <div class="reference-card">
+              <span class="reference-tag">SERVO MOTORS</span>
+              <h3>Servo.h</h3>
+              <p>Sends 50Hz PWM pulses (1ms–2ms) mapping directly to 0°–180° angular position.</p>
+            </div>
+            <div class="reference-card">
+              <span class="reference-tag">I2C BUS</span>
+              <h3>Wire.h (SDA / SCL)</h3>
+              <p>Addressable 2-wire serial bus for connecting OLED displays, IMUs, and RTC modules.</p>
+            </div>
+            <div class="reference-card">
+              <span class="reference-tag">SPI BUS</span>
+              <h3>SPI.h (MOSI / MISO / SCK)</h3>
+              <p>High-speed bus for fast TFT screens, SD card readers, and wireless transceivers.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 18: Engineering Best Practices -->
+        <section>
+          <span class="eyebrow">18 / ENGINEERING RULES</span>
+          <h2>4 Gold Rules of<br /><strong>Embedded C++</strong></h2>
+          <div class="cheat-grid">
+            <div>
+              <span class="reference-tag">RULE 1</span>
+              <h3>Shared Ground</h3>
+              <p>Always connect the GND of your microcontroller, motor drivers, and external power supplies together!</p>
+            </div>
+            <div>
+              <span class="reference-tag">RULE 2</span>
+              <h3>Isolate Motor Supplies</h3>
+              <p>Never power DC motors or heavy servos from the Arduino 5V/3.3V pin. Current spikes cause immediate resets!</p>
+            </div>
+            <div>
+              <span class="reference-tag">RULE 3</span>
+              <h3>Level Shift 5V Signals</h3>
+              <p>Use resistor dividers or bidirectional level shifters when connecting 5V signals to 3.3V GPIOs (ESP32/ARM).</p>
+            </div>
+            <div>
+              <span class="reference-tag">RULE 4</span>
+              <h3>Avoid Dynamic Allocation</h3>
+              <p>Avoid <code>String</code> concatenation in <code>loop()</code> to prevent heap fragmentation. Use static <code>char[]</code> buffers.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 19: Final Summary -->
+        <section class="final-slide">
+          <div>
+            <span class="eyebrow">19 / READY TO BUILD</span>
+            <h2>Build.<br /><strong>Flash. Deploy.</strong></h2>
+            <p class="lead">
+              You now have a solid foundation in embedded software engineering for ACTUATOR 26 robotics projects.
+            </p>
+            <p class="mono small">ARDUINO · EMBEDDED C++ · ACTUATOR 26</p>
+          </div>
+          <div class="stamp">LET'S<br />BUILD IT</div>
+        </section>
+
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

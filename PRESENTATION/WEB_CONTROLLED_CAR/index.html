@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070e17" />
+    <title>ESP32 Web Controlled Car Field Notes | ACTUATOR 26</title>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="brand-mark" aria-label="ROBOCEK logo">
+        <img src="/ROBOCEK%20White%20Logo.png" alt="ROBOCEK" />
+      </div>
+
+      <div class="slides">
+
+        <!-- SLIDE 1: Title Slide -->
+        <section class="title-slide">
+          <span class="eyebrow">01 / IOT &amp; ROBOTICS</span>
+          <h1>ESP32 Web Controlled<br /><strong>Car Robot</strong></h1>
+          <p class="lead subtitle">
+            Wireless SoftAP Control &amp; Embedded Asynchronous Web Dashboard.
+          </p>
+          <div class="meta">
+            <span>ACTUATOR 26</span><span>FIELD NOTES / 2026</span>
+          </div>
+          <div class="corner-mark" aria-hidden="true"></div>
+        </section>
+
+        <!-- SLIDE 2: System Architecture -->
+        <section>
+          <span class="eyebrow">02 / SYSTEM ARCHITECTURE</span>
+          <h2>4 Core Layers of<br /><strong>the Web Car</strong></h2>
+          <p class="lead">From browser touch interactions down to motor hardware drivers:</p>
+          <div class="reference-grid">
+            <div class="reference-card amber-border">
+              <span class="reference-tag">WIFI ACCESS POINT</span>
+              <h3>ESP32 SoftAP Mode</h3>
+              <p>Creates standalone Wi-Fi network (<code>SSID: ROBOCEK-CAR</code>) allowing direct phone/PC connections without a router.</p>
+            </div>
+            <div class="reference-card emerald-border">
+              <span class="reference-tag">HTTP SERVER</span>
+              <h3>Asynchronous WebServer</h3>
+              <p>Hosts HTML/CSS/JS dashboard on Port 80, serving touch controls and processing <code>/move</code> &amp; <code>/speed</code> endpoints.</p>
+            </div>
+            <div class="reference-card">
+              <span class="reference-tag">WEB DASHBOARD</span>
+              <h3>Touch &amp; WASD Interface</h3>
+              <p>Embedded HTML UI with multi-touch buttons, WASD keyboard bindings, and interactive speed sliders.</p>
+            </div>
+            <div class="reference-card rose-border">
+              <span class="reference-tag">ACTUATION</span>
+              <h3>TB6612FNG Driver</h3>
+              <p>Dual H-Bridge MOSFET driver converting software move directives into differential motor PWM outputs.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 3: Circuit Diagram Placeholder -->
+        <section>
+          <span class="eyebrow">03 / SCHEMATIC DIAGRAM</span>
+          <h2>Circuit Diagram &amp;<br /><strong>Hardware Interconnects</strong></h2>
+          
+          <!-- Circuit Diagram Placeholder Box -->
+          <div class="circuit-placeholder">
+            <div class="circuit-badge">SCHEMATIC PLACEHOLDER</div>
+            <h3>ESP32 Dev Board + TB6612FNG Motor Driver</h3>
+            <p>Insert final schematic / Fritzing wiring diagram here. Showing Wi-Fi antenna, motor control pins, and LiPo battery connections.</p>
+            
+            <div class="circuit-specs">
+              <div class="circuit-spec-item">ESP32 SoftAP <span>ROBOCEK-CAR</span></div>
+              <div class="circuit-spec-item">Web Server <span>Port 80 (HTTP)</span></div>
+              <div class="circuit-spec-item">TB6612FNG Driver <span>STBY: 23 | PWM: 33/25</span></div>
+              <div class="circuit-spec-item">Default Speed <span>200 PWM</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 4: Wi-Fi & HTTP Endpoint Architecture -->
+        <section>
+          <span class="eyebrow">04 / NETWORK PROTOCOL</span>
+          <h2>HTTP Endpoints &amp;<br /><strong>REST Route Architecture</strong></h2>
+          <p class="lead">The ESP32 WebServer exposes three light HTTP REST endpoints:</p>
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Endpoint Route</th>
+                <th>HTTP Method</th>
+                <th>Query Parameters</th>
+                <th>Action Performed</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col-feature">/</td>
+                <td class="state-high">GET</td>
+                <td>None</td>
+                <td>Serves embedded PROGMEM HTML/CSS/JS dashboard UI</td>
+              </tr>
+              <tr>
+                <td class="col-feature">/move</td>
+                <td class="state-high">GET</td>
+                <td class="col-modern">?dir=forward | backward | left | right | stop</td>
+                <td>Executes immediate motor direction change</td>
+              </tr>
+              <tr>
+                <td class="col-feature">/speed</td>
+                <td class="state-high">GET</td>
+                <td class="col-modern">?value=0..255</td>
+                <td>Updates global <code>motorSpeed</code> variable dynamically</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- SLIDE 5: Hardware Pin Mapping -->
+        <section>
+          <span class="eyebrow">05 / PIN MAPPING</span>
+          <h2>ESP32 Pinout Assignment<br /><strong>Web Car Config</strong></h2>
+          <p class="lead">Exact GPIO assignments configured in <code>web_controlled_car/src/main.cpp</code>:</p>
+          <div class="pin-grid">
+            <div class="pin-column">
+              <h3>TB6612FNG DRIVER PINS</h3>
+              <div class="pin-item"><strong>RC_MOTOR_STBY</strong> <span>GPIO 23 (Standby Enable)</span></div>
+              <div class="pin-item"><strong>RC_LEFT_PWM</strong> <span>GPIO 33 (Left Speed PWM)</span></div>
+              <div class="pin-item"><strong>RC_LEFT_IN1 / IN2</strong> <span>GPIO 18 / GPIO 19</span></div>
+              <div class="pin-item"><strong>RC_RIGHT_PWM</strong> <span>GPIO 25 (Right Speed PWM)</span></div>
+              <div class="pin-item"><strong>RC_RIGHT_IN1 / IN2</strong> <span>GPIO 26 / GPIO 27</span></div>
+            </div>
+            <div class="pin-column">
+              <h3>WIFI &amp; SERVER CONFIG</h3>
+              <div class="pin-item"><strong>WIFI SSID</strong> <span>ROBOCEK-CAR</span></div>
+              <div class="pin-item"><strong>PASSWORD</strong> <span>12345678</span></div>
+              <div class="pin-item"><strong>IP ADDRESS</strong> <span>192.168.4.1 (Default AP)</span></div>
+              <div class="pin-item"><strong>DEFAULT SPEED</strong> <span>200 (PWM 0-255)</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 6: Code Breakdown - Motor Functions -->
+        <section>
+          <span class="eyebrow">06 / CODE BREAKDOWN</span>
+          <h2>Directional Motor<br /><strong>Driving Functions</strong></h2>
+          <p class="lead">Core motor driving helpers from <code>web_controlled_car/src/main.cpp</code>:</p>
+          <pre><code class="language-cpp">// Left & Right Motor Controls with Speed Signed Polarity
+
+void leftMotor(int speed) {
+    if (speed &gt; 0)       { digitalWrite(RC_LEFT_IN1, HIGH); digitalWrite(RC_LEFT_IN2, LOW); }
+    else if (speed &lt; 0)  { digitalWrite(RC_LEFT_IN1, LOW);  digitalWrite(RC_LEFT_IN2, HIGH); }
+    else                 { digitalWrite(RC_LEFT_IN1, LOW);  digitalWrite(RC_LEFT_IN2, LOW); }
+    analogWrite(RC_LEFT_PWM, abs(speed));
+}
+
+void forward()  { leftMotor(motorSpeed);  rightMotor(motorSpeed); }
+void backward() { leftMotor(-motorSpeed); rightMotor(-motorSpeed); }
+void left()     { leftMotor(-motorSpeed); rightMotor(motorSpeed); }
+void right()    { leftMotor(motorSpeed);  rightMotor(-motorSpeed); }
+void stopCar()  { leftMotor(0);           rightMotor(0); }</code></pre>
+        </section>
+
+        <!-- SLIDE 7: Code Breakdown - HTTP Request Handlers -->
+        <section>
+          <span class="eyebrow">07 / CODE BREAKDOWN</span>
+          <h2>Asynchronous HTTP<br /><strong>Request Handlers</strong></h2>
+          <p class="lead">Parsing incoming URL query arguments in <code>handleMove()</code> and <code>handleSpeed()</code>:</p>
+          <pre><code class="language-cpp">// HTTP Endpoint Handlers
+
+void handleMove() {
+    String direction = server.arg("dir");
+    if (direction == "forward")       forward();
+    else if (direction == "backward") backward();
+    else if (direction == "left")     left();
+    else if (direction == "right")    right();
+    else                              stopCar();
+
+    server.send(200, "text/plain", "OK");
+}
+
+void handleSpeed() {
+    if (server.hasArg("value")) {
+        motorSpeed = constrain(server.arg("value").toInt(), 0, 255);
+    }
+    server.send(200, "text/plain", "OK");
+}</code></pre>
+        </section>
+
+        <!-- SLIDE 8: Code Breakdown - SoftAP & WebServer Launch -->
+        <section>
+          <span class="eyebrow">08 / CODE BREAKDOWN</span>
+          <h2>Wi-Fi SoftAP Setup &amp;<br /><strong>Server Launch</strong></h2>
+          <p class="lead">Creating standalone Access Point &amp; binding HTTP routes in <code>setup()</code>:</p>
+          <pre><code class="language-cpp">// setup() from web_controlled_car/src/main.cpp
+
+void setup() {
+    Serial.begin(115200);
+    // Pin Modes & STBY HIGH...
+    digitalWrite(RC_MOTOR_STBY, HIGH);
+    stopCar();
+
+    WiFi.mode(WIFI_AP);
+    WiFi.softAP(SSID, PASSWORD);
+    Serial.print("AP IP: "); Serial.println(WiFi.softAPIP());
+
+    server.on("/", handleRoot);
+    server.on("/move", handleMove);
+    server.on("/speed", handleSpeed);
+    server.begin();
+}</code></pre>
+        </section>
+
+        <!-- SLIDE 9: Code Breakdown - Non-Blocking Server Loop -->
+        <section>
+          <span class="eyebrow">09 / CODE BREAKDOWN</span>
+          <h2>Zero-Delay Execution<br /><strong>server.handleClient()</strong></h2>
+          <p class="lead">Main loop execution remains 100% non-blocking:</p>
+          <pre><code class="language-cpp">// Non-Blocking Loop Execution
+
+void loop() {
+    server.handleClient(); // Process incoming HTTP client requests immediately
+}</code></pre>
+          <div class="warning-panel" style="margin-top: 1rem;">
+            <span class="reference-tag">GOLDEN RULE</span>
+            <h3>Never Call delay() in a WebServer Loop!</h3>
+            <p>Calling <code>delay()</code> inside <code>loop()</code> causes Wi-Fi packet drops and severe control latency on mobile touch dashboards.</p>
+          </div>
+        </section>
+
+        <!-- SLIDE 10: Embedded UI & Touch Latency Optimization -->
+        <section>
+          <span class="eyebrow">10 / WEB UI DASHBOARD</span>
+          <h2>Responsive UI &amp;<br /><strong>Touch Optimization</strong></h2>
+          <div class="reference-grid">
+            <div class="reference-card amber-border">
+              <span class="reference-tag">TOUCH EVENTS</span>
+              <h3>ontouchstart / ontouchend</h3>
+              <p>Uses touch event listeners instead of standard <code>click</code> to trigger instant motor responses on mobile devices.</p>
+            </div>
+            <div class="reference-card emerald-border">
+              <span class="reference-tag">ASYNC FETCH</span>
+              <h3>Asynchronous fetch() API</h3>
+              <p>Issues background HTTP requests (<code>fetch("/move?dir=forward")</code>) without reloading the HTML page.</p>
+            </div>
+            <div class="reference-card">
+              <span class="reference-tag">KEYBOARD BINDINGS</span>
+              <h3>WASD &amp; Arrow Keys</h3>
+              <p>JavaScript <code>keydown</code> and <code>keyup</code> listeners enable desktop keyboard drive controls.</p>
+            </div>
+            <div class="reference-card rose-border">
+              <span class="reference-tag">SCROLL LOCK</span>
+              <h3>touchmove Prevention</h3>
+              <p>Disables default touch-scrolling (<code>e.preventDefault()</code>) so dragging on screen won't pull the browser window.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 11: Troubleshooting & Network Field Notes -->
+        <section>
+          <span class="eyebrow">11 / TROUBLESHOOTING</span>
+          <h2>4 Web Car<br /><strong>Field Diagnostics</strong></h2>
+          <div class="cheat-grid">
+            <div>
+              <span class="reference-tag">ISSUE 1</span>
+              <h3>Wi-Fi Disconnects</h3>
+              <p>ESP32 SoftAP antenna is sensitive to battery voltage sags. Ensure clean 5V/3.3V logic supply to ESP32 board.</p>
+            </div>
+            <div>
+              <span class="reference-tag">ISSUE 2</span>
+              <h3>Captive Portal Popup</h3>
+              <p>Some smartphones expect internet access on Wi-Fi. Disable "Switch to Mobile Data" setting on phone.</p>
+            </div>
+            <div>
+              <span class="reference-tag">ISSUE 3</span>
+              <h3>Motor Command Latency</h3>
+              <p>If car continues driving after releasing button, check that <code>ontouchend="stop()"</code> is registered on touch elements.</p>
+            </div>
+            <div>
+              <span class="reference-tag">ISSUE 4</span>
+              <h3>Stall at Low Speed</h3>
+              <p>If motors hum at low speed slider settings, increase minimum slider threshold to 60 PWM.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 12: Final Summary Slide -->
+        <section class="final-slide">
+          <div>
+            <span class="eyebrow">12 / READY TO CONTROL</span>
+            <h2>Connect.<br /><strong>Drive. Control.</strong></h2>
+            <p class="lead">
+              Your ESP32 Web-Controlled Car is ready for wireless mobile dashboard control.
+            </p>
+            <p class="mono small">WEB CONTROL · ESP32 · ACTUATOR 26</p>
+          </div>
+          <div class="stamp">LET'S<br />DRIVE IT</div>
+        </section>
+
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

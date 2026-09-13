@@ -1,0 +1,449 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+:root {
+  --ink: #070e17;
+  --paper: #f0f7ff;
+  --muted: #94a3b8;
+  --cyan: #38bdf8;
+  --amber: #fbbf24;
+  --emerald: #34d399;
+  --rose: #f43f5e;
+  --line: rgba(56, 189, 248, 0.22);
+  --panel-bg: rgba(15, 23, 42, 0.82);
+  --code-bg: #091320;
+}
+
+.reveal {
+  color: var(--paper);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 30px;
+  background: var(--ink);
+  background-image: 
+    radial-gradient(ellipse at top, rgba(56, 189, 248, 0.08), transparent 70%),
+    linear-gradient(rgba(56, 189, 248, 0.04) 1px, transparent 1px), 
+    linear-gradient(90deg, rgba(56, 189, 248, 0.04) 1px, transparent 1px);
+  background-size: 100% 100%, 48px 48px, 48px 48px;
+}
+
+.reveal::before {
+  content: 'ARDUINO / PROGRAMMING FIELD NOTES';
+  position: fixed;
+  top: 20px;
+  left: 4.5%;
+  color: var(--cyan);
+  font: 500 12px 'DM Mono', monospace;
+  letter-spacing: 0.16em;
+  z-index: 5;
+}
+
+.brand-mark {
+  position: fixed;
+  top: 16px;
+  right: 4.5%;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+}
+.brand-mark img {
+  display: block;
+  width: 88px;
+  height: auto;
+  max-height: 36px;
+  object-fit: contain;
+}
+
+.reveal::after {
+  content: 'ACTUATOR 26';
+  position: fixed;
+  right: 4.5%;
+  bottom: 20px;
+  color: var(--muted);
+  font: 400 11px 'DM Mono', monospace;
+  letter-spacing: 0.14em;
+  z-index: 5;
+}
+
+.reveal .slides {
+  text-align: left;
+}
+
+/* Screen Fit Section Padding */
+.reveal .slides section {
+  padding: 3.2rem 4rem 1.8rem !important;
+  box-sizing: border-box;
+  height: 100%;
+  overflow: hidden !important;
+}
+
+/* Headings & Typography */
+.reveal h1, .reveal h2, .reveal h3 {
+  color: var(--paper);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  text-transform: none;
+}
+.reveal h1 {
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  line-height: 0.95;
+  max-width: 900px;
+  margin: 0.1em 0 0.2em;
+}
+.reveal h2 {
+  font-size: clamp(1.8rem, 3.5vw, 3rem);
+  line-height: 1.02;
+  margin: 0.05em 0 0.25em;
+}
+.reveal h3 {
+  font-size: 1.2rem;
+  margin: 0 0 0.4rem;
+}
+
+.reveal p {
+  color: var(--muted);
+  line-height: 1.4;
+  font-size: 1rem;
+}
+.reveal strong {
+  color: var(--cyan);
+}
+.reveal .eyebrow {
+  color: var(--amber);
+  font: 500 13px 'DM Mono', monospace;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-bottom: 0.15rem;
+}
+.reveal .lead {
+  font-size: 1rem;
+  max-width: 750px;
+  color: #cbd5e1;
+  margin: 0 0 0.8rem;
+}
+.reveal .mono {
+  font-family: 'DM Mono', monospace;
+}
+.reveal .small {
+  font-size: 0.72rem;
+}
+
+/* Title Slide */
+.title-slide {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100%;
+}
+.title-slide .subtitle {
+  border-left: 3px solid var(--amber);
+  padding-left: 18px;
+  margin-top: 1rem;
+  font-size: 1.2rem;
+}
+.title-slide .meta {
+  margin-top: 3rem;
+  display: flex;
+  gap: 2.5rem;
+  color: var(--muted);
+  font: 400 13px 'DM Mono', monospace;
+  letter-spacing: 0.08em;
+}
+
+.corner-mark {
+  position: absolute;
+  right: 6%;
+  top: 18%;
+  width: 180px;
+  height: 180px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.corner-mark::before, .corner-mark::after {
+  content: '';
+  position: absolute;
+  background: var(--cyan);
+}
+.corner-mark::before {
+  width: 240px;
+  height: 1px;
+  top: 90px;
+  left: -30px;
+  transform: rotate(-45deg);
+  opacity: 0.4;
+}
+.corner-mark::after {
+  width: 1px;
+  height: 240px;
+  top: -30px;
+  left: 90px;
+  transform: rotate(45deg);
+  opacity: 0.25;
+}
+
+/* Layout Grids */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.2rem;
+  align-items: start;
+  margin-top: 0.6rem;
+}
+
+.feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.6rem 0 0;
+}
+.feature-list li {
+  border-top: 1px solid var(--line);
+  padding: 0.65rem 0;
+  color: var(--paper);
+  font-size: 1rem;
+}
+.feature-list li::before {
+  content: '↳';
+  color: var(--amber);
+  margin-right: 12px;
+}
+.feature-list small {
+  color: var(--muted);
+  display: block;
+  padding-left: 28px;
+  font-size: 0.8rem;
+  margin-top: 0.2rem;
+}
+
+/* Cards & Components */
+.reference-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.reference-card {
+  background: var(--panel-bg);
+  padding: 1.1rem 1.3rem;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--cyan);
+  border-radius: 4px;
+}
+.reference-card.amber-border {
+  border-left-color: var(--amber);
+}
+.reference-card.rose-border {
+  border-left-color: var(--rose);
+}
+.reference-card h3 {
+  color: var(--paper);
+  font: 500 1.05rem 'DM Mono', monospace;
+  letter-spacing: 0.02em;
+  margin: 0.35rem 0 0.4rem;
+}
+.reference-card p {
+  font-size: 0.82rem;
+  margin: 0;
+  color: #94a3b8;
+}
+.reference-tag {
+  color: var(--amber);
+  font: 500 11px 'DM Mono', monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Formatted Math Formula Box */
+.formula-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid var(--cyan);
+  border-radius: 6px;
+  padding: 0.6rem 1.2rem;
+  margin: 0.8rem 0;
+  font-family: 'DM Mono', monospace;
+  font-size: 1.1rem;
+  color: var(--paper);
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.15);
+}
+.formula-box .var {
+  color: var(--cyan);
+  font-weight: 500;
+}
+.formula-box .fraction {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 0.3rem;
+  vertical-align: middle;
+}
+.formula-box .fraction .num {
+  border-bottom: 1.5px solid var(--amber);
+  padding: 0 0.4rem 0.1rem;
+  color: var(--amber);
+}
+.formula-box .fraction .den {
+  padding: 0.1rem 0.4rem 0;
+  color: var(--paper);
+}
+
+/* Data Tables */
+.bus-table {
+  display: grid;
+  grid-template-columns: 1fr 0.9fr 1.4fr 1.7fr;
+  border: 1px solid var(--line);
+  background: var(--panel-bg);
+  border-radius: 6px;
+  margin-top: 1rem;
+  font-size: 0.82rem;
+  overflow: hidden;
+}
+.bus-table > div {
+  padding: 0.75rem 0.8rem;
+  border-bottom: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+}
+.bus-table > div:nth-child(4n) {
+  border-right: none;
+}
+.bus-head {
+  color: var(--amber);
+  font: 600 12px 'DM Mono', monospace;
+  text-transform: uppercase;
+  background: rgba(56, 189, 248, 0.08);
+}
+.bus-table .value {
+  color: var(--cyan);
+  font: 500 14px 'DM Mono', monospace;
+}
+
+/* Code Display Override - Screen-Fit Guaranteed */
+.reveal pre {
+  width: 100% !important;
+  margin: 0.5rem 0 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 6px !important;
+  border: 1px solid var(--line) !important;
+  border-left: 4px solid var(--cyan) !important;
+  background: var(--code-bg) !important;
+  font-size: 0.85em !important;
+}
+
+.reveal pre code {
+  padding: 1rem 1.4rem !important;
+  font-family: 'DM Mono', monospace !important;
+  font-size: 0.88rem !important;
+  line-height: 1.45 !important;
+  max-height: 400px !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  color: #e2e8f0 !important;
+  background: transparent !important;
+}
+
+/* Highlight Syntax Customizations */
+.hljs-keyword, .hljs-selector-tag { color: var(--amber) !important; font-weight: 500; }
+.hljs-type, .hljs-class .hljs-title { color: var(--cyan) !important; }
+.hljs-number, .hljs-literal { color: #f472b6 !important; }
+.hljs-string { color: #34d399 !important; }
+.hljs-comment { color: #64748b !important; font-style: italic; }
+.hljs-function .hljs-title, .hljs-title.function_ { color: #60a5fa !important; }
+.hljs-built_in { color: #38bdf8 !important; }
+
+/* Warning & Callout Panels */
+.warning-panel {
+  border: 1px solid var(--rose);
+  border-left: 4px solid var(--rose);
+  padding: 1.2rem 1.5rem;
+  background: rgba(244, 63, 94, 0.08);
+  border-radius: 6px;
+  margin-top: 0.8rem;
+}
+.warning-panel h3 {
+  color: var(--rose);
+  margin-top: 0.3rem;
+  font-size: 1.15rem;
+}
+.warning-panel p {
+  font-size: 0.88rem;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+.cheat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.cheat-grid > div {
+  border-left: 3px solid var(--cyan);
+  padding: 1rem 1.2rem;
+  background: var(--panel-bg);
+  border-radius: 4px;
+}
+.cheat-grid p {
+  font-size: 0.82rem;
+  margin: 0.4rem 0 0;
+}
+.cheat-grid h3 {
+  font: 500 0.98rem 'DM Mono', monospace;
+  margin: 0.2rem 0 0;
+  color: var(--paper);
+}
+
+/* Final Slide */
+.final-slide {
+  display: flex !important;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+.final-slide h2 {
+  max-width: 650px;
+}
+.final-slide .lead {
+  max-width: 620px;
+}
+.final-slide .stamp {
+  border: 2px solid var(--amber);
+  color: var(--amber);
+  padding: 1.2rem 1.8rem;
+  font: 600 16px 'DM Mono', monospace;
+  letter-spacing: 0.12em;
+  transform: rotate(-4deg);
+  text-align: center;
+  box-shadow: 0 0 25px rgba(251, 191, 36, 0.2);
+  border-radius: 6px;
+}
+
+/* Reveal Navigation Controls & Progress Bar */
+.reveal .progress {
+  color: var(--cyan);
+  height: 4px;
+}
+.reveal .controls {
+  color: var(--amber);
+}
+.reveal .slide-number {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: var(--cyan);
+  background: rgba(15, 23, 42, 0.8);
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+}
+
+@media (max-width: 900px) {
+  .reveal { font-size: 22px; }
+  .reveal::after { display: none; }
+  .brand-mark { top: 14px; right: 4.5%; }
+  .brand-mark img { width: 70px; max-height: 28px; }
+  .reveal .slides section { padding: 3rem 1.8rem 1.5rem !important; }
+  .grid-2 { grid-template-columns: 1fr; gap: 1.2rem; }
+  .corner-mark { opacity: 0.2; transform: scale(0.6); right: -5%; top: 10%; }
+  .reference-grid, .cheat-grid { grid-template-columns: 1fr; gap: 0.8rem; }
+  .bus-table { font-size: 0.62rem; grid-template-columns: 1fr 1fr; }
+  .reveal pre code { font-size: 0.8rem !important; padding: 0.8rem !important; }
+}

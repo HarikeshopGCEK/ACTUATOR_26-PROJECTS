@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gyro Gesture Controlled Bot | ACTUATOR 26 Field Notes</title>
+  <meta name="description" content="Complete guide to building a master-slave wireless gesture-controlled robot using ESP8266, ESP32, MPU-6050 6-axis gyro, and TB6612FNG motor driver.">
+</head>
+<body>
+  <div class="brand-mark">
+    <img src="/robocog_logo.png" alt="ROBOCEK Logo">
+  </div>
+
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- SLIDE 1: TITLE -->
+      <section class="title-slide">
+        <div class="corner-mark"></div>
+        <span class="eyebrow">ACTUATOR 26 // MODULE 05</span>
+        <h1>GYRO GESTURE CONTROLLED BOT</h1>
+        <div class="subtitle">
+          6-Axis Motion Tracking & Master-Slave Dual Microcontroller Protocol
+        </div>
+        <div class="meta">
+          <div>MASTER: ESP8266 + MPU-6050</div>
+          <div>SLAVE: ESP32 + TB6612FNG</div>
+          <div>COMM: WI-FI TCP SOCKET (PORT 5000)</div>
+        </div>
+      </section>
+
+      <!-- SLIDE 2: SYSTEM ARCHITECTURE -->
+      <section>
+        <span class="eyebrow">SYSTEM ARCHITECTURE</span>
+        <h2>Master-Slave Wireless Topology</h2>
+        <p class="lead">A dual-node embedded system transmitting real-time 6-axis gesture telemetry over a dedicated local Wi-Fi TCP socket network.</p>
+        
+        <div class="grid-2">
+          <div class="reference-card amber-border">
+            <span class="reference-tag">NODE 1 // GESTURE MASTER</span>
+            <h3>ESP8266 (NodeMCU) + MPU-6050</h3>
+            <p>Worn on the user's hand. Polls 3-axis accelerometer values ($a_x, a_y, a_z$) over I2C (SCL=D1, SDA=D2). Hosts Wi-Fi Access Point <strong class="mono">ROBOCEK-GESTURE</strong> and runs TCP Server on port 5000.</p>
+          </div>
+          <div class="reference-card emerald-border">
+            <span class="reference-tag">NODE 2 // ROBOT SLAVE</span>
+            <h3>ESP32 + TB6612FNG Driver</h3>
+            <p>Onboard vehicle controller. Connects to Master Access Point as Wi-Fi Station (<strong class="mono">192.168.4.1</strong>). Reads incoming TCP gesture command bytes and drives dual DC motors via PWM.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 3: CIRCUIT SCHEMATIC PLACEHOLDER -->
+      <section>
+        <span class="eyebrow">HARDWARE INTERACTION</span>
+        <h2>Master & Slave Circuit Diagram</h2>
+        
+        <div class="circuit-placeholder">
+          <div class="circuit-badge">PLACEHOLDER // SCHEMATIC DIAGRAM</div>
+          <h3>Master Hand Controller & Slave Robot Wiring</h3>
+          <p>Schematic diagram illustrating I2C sensor lines on NodeMCU and Dual Motor Driver control lines on ESP32.</p>
+          
+          <div class="circuit-specs">
+            <div class="circuit-spec-item">
+              MPU-6050 I2C
+              <span>NodeMCU: SDA (D2/GPIO4), SCL (D1/GPIO5)</span>
+            </div>
+            <div class="circuit-spec-item">
+              TB6612FNG STBY
+              <span>ESP32: GPIO 23 (Active HIGH Enable)</span>
+            </div>
+            <div class="circuit-spec-item">
+              MOTOR DRIVER PINS
+              <span>Left: PWM 33, IN1 18, IN2 19 | Right: PWM 25, IN1 26, IN2 27</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 4: MPU-6050 MOTION SENSING -->
+      <section>
+        <span class="eyebrow">SENSOR MECHANICS</span>
+        <h2>MPU-6050 6-Axis Motion Tracking</h2>
+        <p class="lead">The MPU-6050 combines a 3-axis MEMS accelerometer and 3-axis gyroscope with an internal Digital Motion Processor (DMP) communicating over I2C.</p>
+        
+        <div class="grid-2">
+          <div>
+            <ul class="feature-list">
+              <li>
+                <strong>3-Axis Accelerometer</strong>
+                <small>Measures gravitational acceleration ($g = 9.81\text{ m/s}^2$). Tilt changes component vectors $a_x, a_y, a_z$.</small>
+              </li>
+              <li>
+                <strong>Digital Low-Pass Filter</strong>
+                <small>Set to 21 Hz bandwidth to smooth out motor noise and hand tremors.</small>
+              </li>
+              <li>
+                <strong>Sensitivity Range Configuration</strong>
+                <small>Configured for $\pm 8g$ accelerometer range and $\pm 500^\circ/\text{s}$ gyro range.</small>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <pre><code class="language-cpp">// Master setup initialization
+Wire.begin(MPU_SDA, MPU_SCL); // SDA=D2, SCL=D1
+
+if (!mpu.begin()) {
+    Serial.println("MPU6050 NOT FOUND!");
+    while (1) delay(1000);
+}
+
+mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
+mpu.setGyroRange(MPU6050_RANGE_500_DEG);
+mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 5: MASTER SETUP & SOFTAP -->
+      <section>
+        <span class="eyebrow">MASTER FIRMWARE</span>
+        <h2>Wi-Fi SoftAP & TCP Server Setup</h2>
+        <p class="lead">The ESP8266 master configures itself as an autonomous Access Point creating an isolated wireless control network.</p>
+
+        <pre><code class="language-cpp">const char *AP_SSID = "ROBOCEK-GESTURE";
+const char *AP_PASSWORD = "12345678";
+
+WiFiServer server(5000);
+WiFiClient client;
+
+void setup() {
+    Serial.begin(115200);
+    // ... MPU6050 initialization ...
+
+    WiFi.mode(WIFI_AP);
+    WiFi.softAP(AP_SSID, AP_PASSWORD);
+
+    Serial.print("Access Point IP: ");
+    Serial.println(WiFi.softAPIP()); // 192.168.4.1
+
+    server.begin(); // Start listening on TCP Port 5000
+}</code></pre>
+      </section>
+
+      <!-- SLIDE 6: GESTURE TILT MATH & LOGIC -->
+      <section>
+        <span class="eyebrow">GESTURE CLASSIFICATION</span>
+        <h2>Tilt Thresholding Logic</h2>
+        <p class="lead">Hand orientation is decoded by measuring static tilt acceleration vectors along X and Y axes.</p>
+
+        <div class="formula-box">
+          <div class="formula-title">Gesture Threshold Equations (m/s²)</div>
+          <div class="formula-content">
+            <div>Tilt Forward: a<sub>x</sub> &gt; +3.0 &Rightarrow; 'F'</div>
+            <div>|</div>
+            <div>Tilt Backward: a<sub>x</sub> &lt; -3.0 &Rightarrow; 'B'</div>
+          </div>
+          <div class="formula-content" style="margin-top: 0.4rem;">
+            <div>Tilt Left: a<sub>y</sub> &gt; +3.0 &Rightarrow; 'L'</div>
+            <div>|</div>
+            <div>Tilt Right: a<sub>y</sub> &lt; -3.0 &Rightarrow; 'R'</div>
+          </div>
+        </div>
+
+        <pre><code class="language-cpp">#define TILT_FORWARD 3.0
+#define TILT_BACKWARD -3.0
+#define TILT_LEFT 3.0
+#define TILT_RIGHT -3.0
+
+char command = 'S';
+
+if (ax &gt; TILT_FORWARD)       command = 'F';
+else if (ax &lt; TILT_BACKWARD) command = 'B';
+else if (ay &gt; TILT_LEFT)     command = 'L';
+else if (ay &lt; TILT_RIGHT)    command = 'R';
+else                         command = 'S';</code></pre>
+      </section>
+
+      <!-- SLIDE 7: MASTER TRANSMISSION LOOP -->
+      <section>
+        <span class="eyebrow">MASTER FIRMWARE</span>
+        <h2>Telemetry Transmission Loop</h2>
+        <p class="lead">Continuously polls the MPU-6050, evaluates gesture tilt state, and writes single-byte packets over TCP socket.</p>
+
+        <pre><code class="language-cpp">void loop() {
+    // Re-accept client if connection drops
+    if (!client || !client.connected()) {
+        client = server.available();
+        if (client) Serial.println("SLAVE CONNECTED");
+        delay(10);
+        return;
+    }
+
+    sensors_event_t a, g, temp;
+    mpu.getEvent(&a, &g, &temp);
+
+    char command = evaluateGesture(a.acceleration.x, a.acceleration.y);
+
+    // Send 1-byte command to slave car
+    client.write(command);
+    delay(50); // 20 Hz update rate
+}</code></pre>
+      </section>
+
+      <!-- SLIDE 8: WIRELESS PROTOCOL TABLE -->
+      <section>
+        <span class="eyebrow">PROTOCOL SPECIFICATION</span>
+        <h2>Master-Slave Telemetry Truth Table</h2>
+        <p class="lead">Complete mapping of hand tilt posture to transmitted TCP byte and slave motor execution state.</p>
+
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Gesture Posture</th>
+              <th>Accel Vector (m/s²)</th>
+              <th>TCP Byte</th>
+              <th>Slave Motor State</th>
+              <th>Left / Right Motor PWM</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Hand Tilted Forward</td>
+              <td>a<sub>x</sub> &gt; +3.0</td>
+              <td><strong class="mono">'F'</strong></td>
+              <td>Both Motors Forward</td>
+              <td>+200 / +200</td>
+            </tr>
+            <tr>
+              <td>Hand Tilted Backward</td>
+              <td>a<sub>x</sub> &lt; -3.0</td>
+              <td><strong class="mono">'B'</strong></td>
+              <td>Both Motors Reverse</td>
+              <td>-200 / -200</td>
+            </tr>
+            <tr>
+              <td>Hand Tilted Left</td>
+              <td>a<sub>y</sub> &gt; +3.0</td>
+              <td><strong class="mono">'L'</strong></td>
+              <td>Spin Turn Left</td>
+              <td>-200 / +200</td>
+            </tr>
+            <tr>
+              <td>Hand Tilted Right</td>
+              <td>a<sub>y</sub> &lt; -3.0</td>
+              <td><strong class="mono">'R'</strong></td>
+              <td>Spin Turn Right</td>
+              <td>+200 / -200</td>
+            </tr>
+            <tr>
+              <td>Hand Flat / Level</td>
+              <td>-3.0 &le; a<sub>x,y</sub> &le; +3.0</td>
+              <td><strong class="mono">'S'</strong></td>
+              <td>All Motors Stopped</td>
+              <td>0 / 0</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- SLIDE 9: SLAVE STATION & TCP CLIENT -->
+      <section>
+        <span class="eyebrow">SLAVE FIRMWARE</span>
+        <h2>ESP32 Station & TCP Reconnection</h2>
+        <p class="lead">The ESP32 vehicle automatically joins the Master AP and maintains an active TCP connection to port 5000.</p>
+
+        <pre><code class="language-cpp">void connectToMaster() {
+    Serial.println("Connecting to MASTER...");
+    WiFi.mode(WIFI_STA);
+    WiFi.begin("ROBOCEK-GESTURE", "12345678");
+
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+
+    // Connect to Master TCP Socket Server
+    while (!client.connect("192.168.4.1", 5000)) {
+        Serial.println("TCP connection failed");
+        delay(1000);
+    }
+    Serial.println("MASTER LINK ESTABLISHED");
+}</code></pre>
+      </section>
+
+      <!-- SLIDE 10: SLAVE MOTOR DRIVER -->
+      <section>
+        <span class="eyebrow">SLAVE FIRMWARE</span>
+        <h2>TB6612FNG Differential Motor Control</h2>
+        <p class="lead">Bidirectional PWM speed control helper functions driving dual DC motors via the TB6612 H-Bridge driver.</p>
+
+        <div class="grid-2">
+          <div>
+            <div class="pin-column">
+              <h3>ESP32 Pin Mapping</h3>
+              <div class="pin-item"><strong>RC_MOTOR_STBY</strong> <span>GPIO 23 (HIGH)</span></div>
+              <div class="pin-item"><strong>RC_LEFT_PWM</strong> <span>GPIO 33</span></div>
+              <div class="pin-item"><strong>RC_LEFT_IN1 / IN2</strong> <span>GPIO 18 / 19</span></div>
+              <div class="pin-item"><strong>RC_RIGHT_PWM</strong> <span>GPIO 25</span></div>
+              <div class="pin-item"><strong>RC_RIGHT_IN1 / IN2</strong> <span>GPIO 26 / 27</span></div>
+            </div>
+          </div>
+          <div>
+            <pre><code class="language-cpp">void leftMotor(int speed) {
+    if (speed &gt; 0) {
+        digitalWrite(RC_LEFT_IN1, HIGH);
+        digitalWrite(RC_LEFT_IN2, LOW);
+    } else if (speed &lt; 0) {
+        digitalWrite(RC_LEFT_IN1, LOW);
+        digitalWrite(RC_LEFT_IN2, HIGH);
+    } else {
+        digitalWrite(RC_LEFT_IN1, LOW);
+        digitalWrite(RC_LEFT_IN2, LOW);
+    }
+    analogWrite(RC_LEFT_PWM, abs(speed));
+}</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 11: SLAVE COMMAND DISPATCH -->
+      <section>
+        <span class="eyebrow">SLAVE FIRMWARE</span>
+        <h2>TCP Socket Dispatch & Auto-Stop</h2>
+        <p class="lead">Dispatches incoming commands in real-time and triggers immediate motor shutdown if wireless link drops.</p>
+
+        <pre><code class="language-cpp">void loop() {
+    // Fail-safe reconnect if Wi-Fi or TCP disconnects
+    if (WiFi.status() != WL_CONNECTED || !client.connected()) {
+        stopCar();
+        connectToMaster();
+        return;
+    }
+
+    if (client.available()) {
+        char command = client.read();
+        switch (command) {
+            case 'F': forward();   break;
+            case 'B': backward();  break;
+            case 'L': turnLeft();  break;
+            case 'R': turnRight(); break;
+            case 'S': stopCar();   break;
+            default:  stopCar();   break;
+        }
+    }
+}</code></pre>
+      </section>
+
+      <!-- SLIDE 12: SUMMARY & DIAGNOSTICS -->
+      <section class="final-slide">
+        <div>
+          <span class="eyebrow">DIAGNOSTIC & CHECKLIST</span>
+          <h2>Field Calibration & Testing</h2>
+          <div class="cheat-grid">
+            <div>
+              <h3>MPU-6050 Calibration</h3>
+              <p>Place hand controller flat on level table before boot to verify $a_x \approx 0, a_y \approx 0, a_z \approx 9.8\text{ m/s}^2$.</p>
+            </div>
+            <div>
+              <h3>Wireless Socket Ping</h3>
+              <p>Keep transmission delay at 50ms (20 Hz update rate) to ensure rapid response without socket buffer overflow.</p>
+            </div>
+            <div>
+              <h3>Power Supply Separation</h3>
+              <p>Power ESP32 logic and TB6612 VM motor power separately to prevent micro-reset on high motor turn-on spikes.</p>
+            </div>
+            <div>
+              <h3>Fail-Safe Auto-Stop</h3>
+              <p>Always verify vehicle stops immediately when hand controller is powered off or moves out of AP range.</p>
+            </div>
+          </div>
+        </div>
+        <div class="stamp">
+          ACTUATOR 26<br>
+          GESTURE BOT<br>
+          PASSED
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

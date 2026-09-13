@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#07151d" />
+    <title>ESP32 / Hardware Field Notes</title>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="brand-mark" aria-label="ROBOCEK logo">
+        <img src="/ROBOCEK%20White%20Logo.png" alt="ROBOCEK" />
+      </div>
+      <div class="slides">
+        <section class="title-slide">
+          <span class="eyebrow">01 / embedded systems</span>
+          <h1>ESP32<br /><strong>Hardware</strong></h1>
+          <p class="lead subtitle">
+            A tiny board with the reach of a whole lab.
+          </p>
+          <div class="meta">
+            <span>ACTUATOR 26</span><span>FIELD NOTES / 2026</span>
+          </div>
+          <div class="corner-mark" aria-hidden="true"></div>
+        </section>
+
+        <section>
+          <span class="eyebrow">02 / identify the board</span>
+          <div class="board-layout">
+            <div>
+              <h2>ESP32<br /><strong>38-pin breakout.</strong></h2>
+              <p class="lead">
+                A development board built around the ESP32-WROOM-32 module,
+                exposing 19 header positions on each side.
+              </p>
+              <div class="stat-row">
+                <div class="stat">
+                  <strong>38</strong><span>Header pins</span>
+                </div>
+                <div class="stat">
+                  <strong>3.3V</strong><span>GPIO logic</span>
+                </div>
+                <div class="stat">
+                  <strong>240</strong><span>MHz dual core</span>
+                </div>
+              </div>
+            </div>
+            <div
+              class="board-placeholder"
+              role="img"
+              aria-label="ESP32 38-pin breakout board pinout"
+            >
+              <img
+                src="/devkit-38.png"
+                alt="Annotated ESP32 38-pin breakout board pinout"
+              />
+              <small>ESP32 38-PIN DEVKIT / PINOUT REFERENCE</small>
+            </div>
+          </div>
+        </section>
+
+        <section class="pin-reference-slide">
+          <span class="eyebrow">03 / the 38-pin layout</span>
+          <h2>Read the headers<br /><strong>from the outside in.</strong></h2>
+          <p class="lead">
+            Pin names vary slightly between manufacturers. Always compare the
+            silkscreen on your board with its datasheet before wiring.
+          </p>
+          <div class="pin-map">
+            <div class="pin-side left">
+              <span class="side-label">LEFT HEADER / 19</span>
+              <div class="pin-row">
+                <b>1</b><strong>3V3</strong><small>3.3 V OUT</small>
+              </div>
+              <div class="pin-row">
+                <b>2</b><strong>EN</strong><small>RESET</small>
+              </div>
+              <div class="pin-row">
+                <b>3</b><strong>GPIO 36 / VP</strong><small>ADC1 INPUT</small>
+              </div>
+              <div class="pin-row">
+                <b>4</b><strong>GPIO 39 / VN</strong><small>ADC1 INPUT</small>
+              </div>
+              <div class="pin-row">
+                <b>5</b><strong>GPIO 34</strong><small>ADC1 INPUT</small>
+              </div>
+              <div class="pin-row">
+                <b>6</b><strong>GPIO 35</strong><small>ADC1 INPUT</small>
+              </div>
+              <div class="pin-row">
+                <b>7</b><strong>GPIO 32</strong><small>ADC1 / TOUCH</small>
+              </div>
+              <div class="pin-row">
+                <b>8</b><strong>GPIO 33</strong><small>ADC1 / TOUCH</small>
+              </div>
+              <div class="pin-row">
+                <b>9</b><strong>GPIO 25</strong><small>DAC1 / ADC2</small>
+              </div>
+              <div class="pin-row">
+                <b>10</b><strong>GPIO 26</strong><small>DAC2 / ADC2</small>
+              </div>
+              <div class="pin-row">
+                <b>11</b><strong>GPIO 27</strong><small>ADC2 / TOUCH</small>
+              </div>
+              <div class="pin-row">
+                <b>12</b><strong>GPIO 14</strong><small>ADC2 / TOUCH</small>
+              </div>
+              <div class="pin-row">
+                <b>13</b><strong>GPIO 12</strong><small>BOOT STRAP</small>
+              </div>
+              <div class="pin-row">
+                <b>14</b><strong>GND</strong><small>GROUND</small>
+              </div>
+              <div class="pin-row">
+                <b>15</b><strong>GPIO 13</strong><small>ADC2 / TOUCH</small>
+              </div>
+              <div class="pin-row">
+                <b>16</b><strong>GPIO 9 / SD2</strong
+                ><small>FLASH RESERVED</small>
+              </div>
+              <div class="pin-row">
+                <b>17</b><strong>GPIO 10 / SD3</strong
+                ><small>FLASH RESERVED</small>
+              </div>
+              <div class="pin-row">
+                <b>18</b><strong>GPIO 11 / CMD</strong
+                ><small>FLASH RESERVED</small>
+              </div>
+              <div class="pin-row">
+                <b>19</b><strong>VIN</strong><small>5 V INPUT</small>
+              </div>
+            </div>
+            <div class="pin-spine">
+              <span>ESP32</span><small>WROOM-32</small>
+            </div>
+            <div class="pin-side right">
+              <span class="side-label">RIGHT HEADER / 19</span>
+              <div class="pin-row">
+                <b>1</b><strong>GND</strong><small>GROUND</small>
+              </div>
+              <div class="pin-row">
+                <b>2</b><strong>GPIO 23</strong><small>VSPI MOSI</small>
+              </div>
+              <div class="pin-row">
+                <b>3</b><strong>GPIO 22</strong><small>I²C SCL</small>
+              </div>
+              <div class="pin-row">
+                <b>4</b><strong>GPIO 1 / TX0</strong><small>UART0 TX</small>
+              </div>
+              <div class="pin-row">
+                <b>5</b><strong>GPIO 3 / RX0</strong><small>UART0 RX</small>
+              </div>
+              <div class="pin-row">
+                <b>6</b><strong>GPIO 21</strong><small>I²C SDA</small>
+              </div>
+              <div class="pin-row">
+                <b>7</b><strong>GND</strong><small>GROUND</small>
+              </div>
+              <div class="pin-row">
+                <b>8</b><strong>GPIO 19</strong><small>VSPI MISO</small>
+              </div>
+              <div class="pin-row">
+                <b>9</b><strong>GPIO 18</strong><small>VSPI SCLK</small>
+              </div>
+              <div class="pin-row">
+                <b>10</b><strong>GPIO 5</strong><small>VSPI CS</small>
+              </div>
+              <div class="pin-row">
+                <b>11</b><strong>GPIO 17</strong><small>UART2 TX</small>
+              </div>
+              <div class="pin-row">
+                <b>12</b><strong>GPIO 16</strong><small>UART2 RX</small>
+              </div>
+              <div class="pin-row">
+                <b>13</b><strong>GPIO 4</strong><small>ADC2 / TOUCH</small>
+              </div>
+              <div class="pin-row">
+                <b>14</b><strong>GPIO 0</strong><small>BOOT STRAP</small>
+              </div>
+              <div class="pin-row">
+                <b>15</b><strong>GPIO 2</strong><small>BOOT STRAP</small>
+              </div>
+              <div class="pin-row">
+                <b>16</b><strong>GPIO 15</strong><small>BOOT / TOUCH</small>
+              </div>
+              <div class="pin-row">
+                <b>17</b><strong>GND</strong><small>GROUND</small>
+              </div>
+              <div class="pin-row">
+                <b>18</b><strong>GPIO 6 / CLK</strong
+                ><small>FLASH RESERVED</small>
+              </div>
+              <div class="pin-row">
+                <b>19</b><strong>GPIO 7 / SD1</strong
+                ><small>FLASH RESERVED</small>
+              </div>
+            </div>
+          </div>
+          <p class="small-note">
+            Common 38-pin DevKitC-style reference. Header order and labels can
+            vary by manufacturer; verify the silkscreen before wiring.
+          </p>
+        </section>
+
+        <section>
+          <span class="eyebrow">04 / complete signal reference</span>
+          <h2>What each group<br /><strong>is good for.</strong></h2>
+          <div class="reference-grid">
+            <div class="reference-card">
+              <span class="reference-tag">POWER</span>
+              <h3>VIN · 3V3 · GND</h3>
+              <p>
+                VIN accepts regulated 5 V through the board regulator. 3V3 is
+                the regulated output. Connect grounds together before testing.
+              </p>
+            </div>
+            <div class="reference-card">
+              <span class="reference-tag">DIGITAL I/O</span>
+              <h3>GPIO 0–33</h3>
+              <p>
+                General-purpose digital pins. Most support input, output,
+                interrupts, and PWM. GPIO 34–39 are input-only.
+              </p>
+            </div>
+            <div class="reference-card">
+              <span class="reference-tag">ANALOG</span>
+              <h3>ADC1: 32–39</h3>
+              <p>
+                Use ADC1 for analog sensors when Wi-Fi is active. ADC2 conflicts
+                with Wi-Fi and is less dependable for that use.
+              </p>
+            </div>
+            <div class="reference-card">
+              <span class="reference-tag">SPECIAL</span>
+              <h3>DAC · TOUCH · RTC</h3>
+              <p>
+                DAC output: GPIO25/26. Capacitive touch: GPIO0, 2, 4, 12–15, 27,
+                32, 33. RTC GPIOs support low-power wake.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <span class="eyebrow">05 / communication defaults</span>
+          <h2>One board,<br /><strong>many buses.</strong></h2>
+          <div class="bus-table">
+            <div class="bus-head">Bus</div>
+            <div class="bus-head">Default pins</div>
+            <div class="bus-head">Typical hardware</div>
+            <div class="bus-head">Notes</div>
+            <div class="value">I²C</div>
+            <div>GPIO 21 SDA<br />GPIO 22 SCL</div>
+            <div>OLED, IMU, sensors</div>
+            <div>Pull-up resistors are normally required.</div>
+            <div class="value">VSPI</div>
+            <div>GPIO 23 MOSI<br />19 MISO · 18 SCLK · 5 CS</div>
+            <div>SD card, displays</div>
+            <div>Chip select is software-controlled.</div>
+            <div class="value">UART2</div>
+            <div>GPIO 17 TX2<br />GPIO 16 RX2</div>
+            <div>GPS, motor controllers</div>
+            <div>Use a common ground and matching logic levels.</div>
+            <div class="value">UART0</div>
+            <div>GPIO 1 TX0<br />GPIO 3 RX0</div>
+            <div>USB serial monitor</div>
+            <div>Shared with programming and debug.</div>
+          </div>
+        </section>
+
+        <section>
+          <span class="eyebrow">06 / pin map at a glance</span>
+          <h2>A quick-reference<br /><strong>cheat sheet.</strong></h2>
+          <div class="cheat-grid">
+            <div>
+              <span class="reference-tag">SAFE STARTERS</span>
+              <p>
+                <strong
+                  >GPIO 16, 17, 18, 19, 21, 22, 23, 25, 26, 27, 32, 33</strong
+                ><br />Good general choices after checking your peripheral
+                requirements.
+              </p>
+            </div>
+            <div>
+              <span class="reference-tag">INPUT ONLY</span>
+              <p>
+                <strong>GPIO 34, 35, 36 / VP, 39 / VN</strong><br />Read sensors
+                here. They cannot drive an LED, relay, or motor.
+              </p>
+            </div>
+            <div>
+              <span class="reference-tag">FLASH RESERVED</span>
+              <p>
+                <strong>GPIO 6–11</strong><br />Connected to the module's SPI
+                flash. Do not use them as breakout pins.
+              </p>
+            </div>
+            <div>
+              <span class="reference-tag">BOOT SENSITIVE</span>
+              <p>
+                <strong>GPIO 0, 2, 5, 12, 15</strong><br />External pull-ups or
+                pull-downs can stop the board from booting.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <span class="eyebrow">07 / power and protection</span>
+          <div class="grid-2">
+            <div>
+              <h2>Three rules<br /><strong>before power-up.</strong></h2>
+              <ul class="feature-list">
+                <li>
+                  Use 3.3 V logic<small
+                    >ESP32 GPIO is not 5 V tolerant. Level-shift 5 V sensor
+                    signals.</small
+                  >
+                </li>
+                <li>
+                  Share the ground<small
+                    >Every external module needs a common GND reference with the
+                    ESP32.</small
+                  >
+                </li>
+                <li>
+                  Feed motors separately<small
+                    >Motor noise and current spikes belong on their own supply,
+                    with a driver between.</small
+                  >
+                </li>
+              </ul>
+            </div>
+            <div class="warning-panel">
+              <span class="reference-tag">CHECK THIS FIRST</span>
+              <h3>Never connect 5 V directly to a GPIO.</h3>
+              <p>
+                Power the board through USB, VIN, or a clean regulated 5 V
+                source. Confirm polarity and current capacity before attaching a
+                battery.
+              </p>
+              <div class="voltage-line">
+                <span>5 V</span><i></i><span>3.3 V</span><i></i
+                ><span>GPIO</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <span class="eyebrow">08 / from code to motion</span>
+          <div class="grid-2">
+            <div>
+              <h2>Sense.<br /><strong>Decide. Act.</strong></h2>
+              <p class="lead">
+                A reliable embedded project keeps the loop simple: collect a
+                signal, make a decision, produce a visible result.
+              </p>
+              <p class="mono small">GPIO → peripheral → logic → output</p>
+            </div>
+            <div class="code-window">
+              <span class="comment">// read, decide, respond</span><br /><span
+                class="key"
+                >const</span
+              >
+              distance = <span class="fn">readSensor</span>();<br /><span
+                class="key"
+                >if</span
+              >
+              (distance &lt; <span class="fn">SAFE_LIMIT</span>) {<br />&nbsp;&nbsp;<span
+                class="fn"
+                >stopMotors</span
+              >();<br />&nbsp;&nbsp;<span class="fn">signalWarning</span
+              >();<br />} <span class="key">else</span> {<br />&nbsp;&nbsp;<span
+                class="fn"
+                >driveForward</span
+              >();<br />}
+            </div>
+          </div>
+        </section>
+
+        <section class="final-slide">
+          <div>
+            <span class="eyebrow">09 / thank you</span>
+            <h2>Thank<br /><strong>You.</strong></h2>
+            <p class="lead">
+              Let’s learn how to program and turn ideas into real hardware.
+            </p>
+            <p class="mono small">ESP32 · CODE · CREATE</p>
+          </div>
+          <div class="stamp">LET'S<br />PROGRAM</div>
+        </section>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

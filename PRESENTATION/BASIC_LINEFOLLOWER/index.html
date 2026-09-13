@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070e17" />
+    <title>Basic Line Follower Robot Field Notes | ACTUATOR 26</title>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="brand-mark" aria-label="ROBOCEK logo">
+        <img src="/ROBOCEK%20White%20Logo.png" alt="ROBOCEK" />
+      </div>
+
+      <div class="slides">
+
+        <!-- SLIDE 1: Title Slide -->
+        <section class="title-slide">
+          <span class="eyebrow">01 / AUTONOMOUS ROBOTICS</span>
+          <h1>Basic Line Follower<br /><strong>Robot</strong></h1>
+          <p class="lead subtitle">
+            Closed-Loop Infrared Tracking with ESP32 &amp; TB6612FNG Driver.
+          </p>
+          <div class="meta">
+            <span>ACTUATOR 26</span><span>FIELD NOTES / 2026</span>
+          </div>
+          <div class="corner-mark" aria-hidden="true"></div>
+        </section>
+
+        <!-- SLIDE 2: System Architecture -->
+        <section>
+          <span class="eyebrow">02 / SYSTEM ARCHITECTURE</span>
+          <h2>4 Core Components of<br /><strong>a Line Follower</strong></h2>
+          <p class="lead">The robot operates a continuous sense-decide-act feedback loop:</p>
+          <div class="reference-grid">
+            <div class="reference-card amber-border">
+              <span class="reference-tag">BRAIN</span>
+              <h3>ESP32 Microcontroller</h3>
+              <p>Executes control logic at high speeds, reading digital IR sensor inputs and generating PWM motor signals.</p>
+            </div>
+            <div class="reference-card emerald-border">
+              <span class="reference-tag">PERCEPTION</span>
+              <h3>Dual IR Line Sensors</h3>
+              <p>Infrared emitter/receiver pairs placed on the underside to detect light vs dark surface boundaries.</p>
+            </div>
+            <div class="reference-card">
+              <span class="reference-tag">ACTUATION</span>
+              <h3>TB6612FNG Driver</h3>
+              <p>High-efficiency MOSFET dual H-Bridge driving two DC gearmotors with independent speed and direction.</p>
+            </div>
+            <div class="reference-card rose-border">
+              <span class="reference-tag">POWER</span>
+              <h3>LiPo / Battery Supply</h3>
+              <p>Provides separate motor power (VM) and regulated logic voltage to the ESP32.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 3: Circuit Diagram Placeholder -->
+        <section>
+          <span class="eyebrow">03 / SCHEMATIC DIAGRAM</span>
+          <h2>Circuit Diagram &amp;<br /><strong>Hardware Interconnects</strong></h2>
+          
+          <!-- Circuit Diagram Placeholder Box -->
+          <div class="circuit-placeholder">
+            <div class="circuit-badge">SCHEMATIC PLACEHOLDER</div>
+            <h3>ESP32 + TB6612FNG + Dual IR Sensors</h3>
+            <p>Insert final schematic / Fritzing wiring diagram here. Showing power rails, common GND bus, motor driver pins, and IR sensor headers.</p>
+            
+            <div class="circuit-specs">
+              <div class="circuit-spec-item">ESP32 MCU <span>3.3V Logic</span></div>
+              <div class="circuit-spec-item">TB6612FNG Driver <span>Dual H-Bridge</span></div>
+              <div class="circuit-spec-item">Dual IR Sensors <span>GPIO 32 &amp; 34</span></div>
+              <div class="circuit-spec-item">Common GND <span>Unified Ground</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 4: IR Sensor Working Principle -->
+        <section>
+          <span class="eyebrow">04 / SENSOR PRINCIPLE</span>
+          <h2>Infrared Reflectance<br /><strong>Light vs Dark Detection</strong></h2>
+          <p class="lead">Understanding how IR reflectance sensors differentiate surface boundaries:</p>
+          <div class="grid-2">
+            <div>
+              <h3>1. White Surface (Reflective)</h3>
+              <p class="lead" style="margin-bottom: 0.4rem;">White surfaces reflect infrared light back to the phototransistor photodiode.</p>
+              <div class="reference-card emerald-border">
+                <span class="reference-tag">DIGITAL OUTPUT</span>
+                <h3>LOW (0V Signal)</h3>
+                <p>Phototransistor conducts -> Signal pin drops LOW.</p>
+              </div>
+            </div>
+            <div>
+              <h3>2. Black Line (Absorptive)</h3>
+              <p class="lead" style="margin-bottom: 0.4rem;">Black tape absorbs infrared light, preventing reflection to the receiver.</p>
+              <div class="reference-card rose-border">
+                <span class="reference-tag">DIGITAL OUTPUT</span>
+                <h3>HIGH (3.3V Signal)</h3>
+                <p>Phototransistor off -> Internal pull-up pulls pin HIGH.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 5: Hardware Pin Mapping -->
+        <section>
+          <span class="eyebrow">05 / PIN MAPPING</span>
+          <h2>ESP32 Pinout Assignment<br /><strong>Line Follower Config</strong></h2>
+          <p class="lead">Exact GPIO pin assignments configured in <code>line_follower/src/main.cpp</code>:</p>
+          <div class="pin-grid">
+            <div class="pin-column">
+              <h3>TB6612FNG DRIVER PINS</h3>
+              <div class="pin-item"><strong>RC_MOTOR_STBY</strong> <span>GPIO 23 (Standby Enable)</span></div>
+              <div class="pin-item"><strong>RC_LEFT_PWM</strong> <span>GPIO 33 (Left Speed PWM)</span></div>
+              <div class="pin-item"><strong>RC_LEFT_IN1 / IN2</strong> <span>GPIO 18 / GPIO 19</span></div>
+              <div class="pin-item"><strong>RC_RIGHT_PWM</strong> <span>GPIO 25 (Right Speed PWM)</span></div>
+              <div class="pin-item"><strong>RC_RIGHT_IN1 / IN2</strong> <span>GPIO 26 / GPIO 27</span></div>
+            </div>
+            <div class="pin-column">
+              <h3>IR SENSORS &amp; SPEED</h3>
+              <div class="pin-item"><strong>RC_IR_LEFT</strong> <span>GPIO 32 (Left IR Input)</span></div>
+              <div class="pin-item"><strong>RC_IR_RIGHT</strong> <span>GPIO 34 (Right IR Input)</span></div>
+              <div class="pin-item"><strong>SPEED</strong> <span>100 (PWM Duty Cycle)</span></div>
+              <div class="pin-item"><strong>BAUD RATE</strong> <span>115200 Baud</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 6: Line Follower Truth Table -->
+        <section>
+          <span class="eyebrow">06 / CONTROL ALGORITHM</span>
+          <h2>Navigation Truth Table<br /><strong>4-State Steering Matrix</strong></h2>
+          <p class="lead">Sensors detect line alignment to determine steering action:</p>
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Left IR (Pin 32)</th>
+                <th>Right IR (Pin 34)</th>
+                <th>Left Motor State</th>
+                <th>Right Motor State</th>
+                <th>Robot Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="state-low">LOW (Surface)</td>
+                <td class="state-low">LOW (Surface)</td>
+                <td class="state-pwm">FORWARD (SPEED 100)</td>
+                <td class="state-pwm">FORWARD (SPEED 100)</td>
+                <td>Move Straight Ahead</td>
+              </tr>
+              <tr>
+                <td class="state-high">HIGH (Line)</td>
+                <td class="state-low">LOW (Surface)</td>
+                <td class="state-low">STOP (0 PWM)</td>
+                <td class="state-pwm">FORWARD (SPEED 100)</td>
+                <td>Pivot Turn Left</td>
+              </tr>
+              <tr>
+                <td class="state-low">LOW (Surface)</td>
+                <td class="state-high">HIGH (Line)</td>
+                <td class="state-pwm">FORWARD (SPEED 100)</td>
+                <td class="state-low">STOP (0 PWM)</td>
+                <td>Pivot Turn Right</td>
+              </tr>
+              <tr>
+                <td class="state-high">HIGH (Line)</td>
+                <td class="state-high">HIGH (Line)</td>
+                <td class="state-low">STOP (0 PWM)</td>
+                <td class="state-low">STOP (0 PWM)</td>
+                <td>Stop (End of Line)</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- SLIDE 7: Code Breakdown - Setup -->
+        <section>
+          <span class="eyebrow">07 / CODE BREAKDOWN</span>
+          <h2>Initialization &amp;<br /><strong>Pin Mode Setup</strong></h2>
+          <p class="lead">Configuring GPIO directions &amp; bringing driver out of standby in <code>setup()</code>:</p>
+          <pre><code class="language-cpp">// setup() from line_follower/src/main.cpp
+
+void setup() {
+    Serial.begin(115200);
+    pinMode(RC_MOTOR_STBY, OUTPUT);
+    pinMode(RC_LEFT_PWM, OUTPUT);   pinMode(RC_LEFT_IN1, OUTPUT);   pinMode(RC_LEFT_IN2, OUTPUT);
+    pinMode(RC_RIGHT_PWM, OUTPUT);  pinMode(RC_RIGHT_IN1, OUTPUT);  pinMode(RC_RIGHT_IN2, OUTPUT);
+    pinMode(RC_IR_LEFT, INPUT);
+    pinMode(RC_IR_RIGHT, INPUT);
+
+    digitalWrite(RC_MOTOR_STBY, HIGH); // Enable TB6612FNG Driver
+}</code></pre>
+        </section>
+
+        <!-- SLIDE 8: Code Breakdown - Sensor Sampling -->
+        <section>
+          <span class="eyebrow">08 / CODE BREAKDOWN</span>
+          <h2>Sensor Sampling &amp;<br /><strong>Telemetry Logging</strong></h2>
+          <p class="lead">Reading digital IR levels and logging debug statements to Serial:</p>
+          <pre><code class="language-cpp">// Sampling IR Sensor Inputs in loop()
+
+void loop() {
+    int leftSensorValue = digitalRead(RC_IR_LEFT);
+    int rightSensorValue = digitalRead(RC_IR_RIGHT);
+
+    Serial.print("LEFT IR: ");  Serial.println(leftSensorValue);
+    Serial.print("RIGHT IR: "); Serial.println(rightSensorValue);
+
+    // Decision Logic Follows...
+}</code></pre>
+        </section>
+
+        <!-- SLIDE 9: Code Breakdown - Control Logic -->
+        <section>
+          <span class="eyebrow">09 / CODE BREAKDOWN</span>
+          <h2>Differential Steering<br /><strong>Decision Tree Code</strong></h2>
+          <p class="lead">Executing directional movement based on sensor conditions:</p>
+          <pre><code class="language-cpp">    if (leftSensorValue == LOW &amp;&amp; rightSensorValue == LOW) {
+        // Both on surface -> Move forward
+        digitalWrite(RC_LEFT_IN1, HIGH);  digitalWrite(RC_LEFT_IN2, LOW);  analogWrite(RC_LEFT_PWM, SPEED);
+        digitalWrite(RC_RIGHT_IN1, HIGH); digitalWrite(RC_RIGHT_IN2, LOW); analogWrite(RC_RIGHT_PWM, SPEED);
+    } else if (leftSensorValue == HIGH &amp;&amp; rightSensorValue == LOW) {
+        // Left on line -> Turn left
+        digitalWrite(RC_LEFT_IN1, LOW);   digitalWrite(RC_LEFT_IN2, LOW);  analogWrite(RC_LEFT_PWM, 0);
+        digitalWrite(RC_RIGHT_IN1, HIGH); digitalWrite(RC_RIGHT_IN2, LOW); analogWrite(RC_RIGHT_PWM, SPEED);
+    } else if (leftSensorValue == LOW &amp;&amp; rightSensorValue == HIGH) {
+        // Right on line -> Turn right
+        digitalWrite(RC_LEFT_IN1, HIGH);  digitalWrite(RC_LEFT_IN2, LOW);  analogWrite(RC_LEFT_PWM, SPEED);
+        digitalWrite(RC_RIGHT_IN1, LOW);  digitalWrite(RC_RIGHT_IN2, LOW);  analogWrite(RC_RIGHT_PWM, 0);
+    } else {
+        // Both on line -> Stop
+        digitalWrite(RC_LEFT_IN1, LOW);   digitalWrite(RC_LEFT_IN2, LOW);  analogWrite(RC_LEFT_PWM, 0);
+        digitalWrite(RC_RIGHT_IN1, LOW);  digitalWrite(RC_RIGHT_IN2, LOW);  analogWrite(RC_RIGHT_PWM, 0);
+    }
+    delay(100);</code></pre>
+        </section>
+
+        <!-- SLIDE 10: Speed Tuning & Optimization -->
+        <section>
+          <span class="eyebrow">10 / HARDWARE TUNING</span>
+          <h2>Speed Tuning &amp;<br /><strong>Sensor Calibration</strong></h2>
+          <div class="reference-grid">
+            <div class="reference-card amber-border">
+              <span class="reference-tag">SPEED PARAMETER</span>
+              <h3>#define SPEED 100</h3>
+              <p>Controls maximum forward PWM duty cycle. Increase for speed, decrease if robot overshoots tight curves.</p>
+            </div>
+            <div class="reference-card emerald-border">
+              <span class="reference-tag">HEIGHT SENSITIVITY</span>
+              <h3>Sensor Height (3mm – 5mm)</h3>
+              <p>Keep IR modules 3mm to 5mm above the track surface for crisp high-contrast reflection signals.</p>
+            </div>
+            <div class="reference-card">
+              <span class="reference-tag">POTENTIOMETER ADJUST</span>
+              <h3>Threshold Trimmer</h3>
+              <p>Adjust potentiometer on IR modules until onboard LED toggles sharply between tape and floor.</p>
+            </div>
+            <div class="reference-card rose-border">
+              <span class="reference-tag">LOOP DELAY</span>
+              <h3>Sampling Rate</h3>
+              <p>A 100ms delay in <code>loop()</code> prevents Serial buffer overload while providing smooth steering evaluation.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 11: Troubleshooting & Field Notes -->
+        <section class="troubleshooting-slide">
+          <span class="eyebrow">11 / TROUBLESHOOTING</span>
+          <h2>4 Common Line<br /><strong>Follower Pitfalls</strong></h2>
+          <div class="cheat-grid">
+            <div>
+              <span class="reference-tag">ISSUE 1</span>
+              <h3>Ambient Light Interference</h3>
+              <p>Direct sunlight or bright overhead lights can blind IR receivers. Shield sensor array with a dark skirt.</p>
+            </div>
+            <div>
+              <span class="reference-tag">ISSUE 2</span>
+              <h3>Reversed Motor Direction</h3>
+              <p>If robot spins in circles when going forward, swap motor terminals (IN1/IN2) or swap motor wire pairs.</p>
+            </div>
+            <div>
+              <span class="reference-tag">ISSUE 3</span>
+              <h3>Battery Voltage Sag</h3>
+              <p>Weak batteries cause ESP32 micro-resets when motors start. Always use separate battery for VM rail.</p>
+            </div>
+            <div>
+              <span class="reference-tag">ISSUE 4</span>
+              <h3>STBY Pin Disconnected</h3>
+              <p>If motors don't move at all, verify GPIO 23 (STBY) is driven HIGH in <code>setup()</code>!</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 12: Final Summary Slide -->
+        <section class="final-slide">
+          <div>
+            <span class="eyebrow">12 / READY TO TRACK</span>
+            <h2>Sense.<br /><strong>Decide. Track.</strong></h2>
+            <p class="lead">
+              Your ESP32 Line Follower robot is fully configured for autonomous track navigation.
+            </p>
+            <p class="mono small">LINE FOLLOWER · ESP32 · ACTUATOR 26</p>
+          </div>
+          <div class="stamp">LET'S<br />TRACK IT</div>
+        </section>
+
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
