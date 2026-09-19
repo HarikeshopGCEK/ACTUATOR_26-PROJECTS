@@ -49,15 +49,7 @@ void setup()
 
     Wire.begin(MPU_SDA, MPU_SCL);
 
-    if (!mpu.begin())
-    {
-        Serial.println("MPU6050 NOT FOUND!");
-
-        while (1)
-        {
-            delay(1000);
-        }
-    }
+    mpu.begin()
 
     Serial.println("MPU6050 OK");
 

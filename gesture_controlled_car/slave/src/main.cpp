@@ -42,7 +42,7 @@ WiFiClient client;
 #define RC_RIGHT_IN1 26
 #define RC_RIGHT_IN2 27
 
-int motorSpeed = 200;
+int motorSpeed = 128;
 
 // =========================
 // MOTOR CONTROL
