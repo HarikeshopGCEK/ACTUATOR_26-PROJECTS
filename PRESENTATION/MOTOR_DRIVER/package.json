@@ -11,5 +11,8 @@
   "dependencies": {
     "reveal.js": "^6.0.2",
     "vite": "^6.1.0"
+  },
+  "devDependencies": {
+    "vite-plugin-singlefile": "^2.3.3"
   }
 }

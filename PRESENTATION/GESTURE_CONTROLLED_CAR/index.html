@@ -8,7 +8,7 @@
 </head>
 <body>
   <div class="brand-mark">
-    <img src="/robocog_logo.png" alt="ROBOCEK Logo">
+    <img src="./robocog_logo.png" alt="ROBOCEK Logo">
   </div>
 
   <div class="reveal">
@@ -49,28 +49,36 @@
         </div>
       </section>
 
-      <!-- SLIDE 3: CIRCUIT SCHEMATIC PLACEHOLDER -->
+      <!-- SLIDE 3: MASTER & SLAVE CIRCUIT DIAGRAMS -->
       <section>
         <span class="eyebrow">HARDWARE INTERACTION</span>
-        <h2>Master & Slave Circuit Diagram</h2>
+        <h2>Master &amp; Slave Circuit Diagrams</h2>
+        <p class="lead">Complete hardware schematics for the hand-worn Master Controller (ESP8266 + MPU-6050) and vehicle Slave Chassis (ESP32 + TB6612FNG).</p>
         
-        <div class="circuit-placeholder">
-          <div class="circuit-badge">PLACEHOLDER // SCHEMATIC DIAGRAM</div>
-          <h3>Master Hand Controller & Slave Robot Wiring</h3>
-          <p>Schematic diagram illustrating I2C sensor lines on NodeMCU and Dual Motor Driver control lines on ESP32.</p>
-          
-          <div class="circuit-specs">
-            <div class="circuit-spec-item">
-              MPU-6050 I2C
-              <span>NodeMCU: SDA (D2/GPIO4), SCL (D1/GPIO5)</span>
+        <div class="circuit-grid">
+          <!-- Node 1: Master Hand Controller -->
+          <div class="circuit-card">
+            <div class="circuit-badge amber-badge">NODE 1 // MASTER GESTURE CONTROLLER</div>
+            <div class="circuit-image-frame">
+              <img src="/master_circuit.png" alt="Gesture Controlled Master Circuit Diagram - ESP8266 &amp; MPU-6050" class="circuit-img" />
             </div>
-            <div class="circuit-spec-item">
-              TB6612FNG STBY
-              <span>ESP32: GPIO 23 (Active HIGH Enable)</span>
+            <div class="circuit-specs-compact">
+              <div><strong>ESP8266 NodeMCU</strong> <span>SoftAP TCP Server (Port 5000)</span></div>
+              <div><strong>MPU-6050 Gyro/Accel</strong> <span>SDA: D2 (GPIO4) | SCL: D1 (GPIO5)</span></div>
+              <div><strong>LM7805 Voltage Regulator</strong> <span>5V Vin Logic Power</span></div>
             </div>
-            <div class="circuit-spec-item">
-              MOTOR DRIVER PINS
-              <span>Left: PWM 33, IN1 18, IN2 19 | Right: PWM 25, IN1 26, IN2 27</span>
+          </div>
+
+          <!-- Node 2: Slave Robot Car -->
+          <div class="circuit-card">
+            <div class="circuit-badge emerald-badge">NODE 2 // SLAVE ROBOT CAR</div>
+            <div class="circuit-image-frame">
+              <img src="/slave_circuit.png" alt="Circuit Diagram of Master Gesture Controlled Car - ESP32 &amp; TB6612FNG" class="circuit-img" />
+            </div>
+            <div class="circuit-specs-compact">
+              <div><strong>ESP32 Microcontroller</strong> <span>Wi-Fi STA TCP Client (192.168.4.1)</span></div>
+              <div><strong>TB6612FNG Driver</strong> <span>STBY: 23 | PWM: 33/25 | IN: 18/19/26/27</span></div>
+              <div><strong>Dual N20 Motors &amp; 7805</strong> <span>Battery Powered Motor Rail</span></div>
             </div>
           </div>
         </div>

@@ -256,7 +256,37 @@
   text-transform: uppercase;
 }
 
-/* CIRCUIT DIAGRAM PLACEHOLDER */
+/* CIRCUIT DIAGRAM CONTAINER */
+.circuit-container {
+  border: 1px solid var(--line);
+  background: rgba(15, 23, 42, 0.85);
+  border-radius: 8px;
+  padding: 1.2rem;
+  margin-top: 0.8rem;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.circuit-image-frame {
+  background: #ffffff;
+  border-radius: 6px;
+  padding: 0.8rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.circuit-img {
+  max-height: 440px;
+  width: 100%;
+  object-fit: contain;
+  display: block;
+  border-radius: 4px;
+}
+
+/* CIRCUIT DIAGRAM PLACEHOLDER FALLBACK */
 .circuit-placeholder {
   border: 2px dashed rgba(56, 189, 248, 0.45);
   background: rgba(15, 23, 42, 0.85);
