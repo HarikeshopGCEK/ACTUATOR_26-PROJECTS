@@ -114,64 +114,79 @@ void right()
 // =========================
 
 const char HTML[] PROGMEM = R"rawliteral(
-
 <!DOCTYPE html>
-
-<html>
-
+<html lang="en">
 <head>
-
-<meta name="viewport"
-      content="width=device-width,
-               initial-scale=1,
-               maximum-scale=1,
-               user-scalable=no">
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>ROBOCEK CAR</title>
-
 <style>
-
 * {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
-body {
+html, body {
     margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
     background: #090d12;
-    color: white;
-    font-family: Arial, sans-serif;
+    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
     overflow: hidden;
 }
 
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .container {
-    max-width: 500px;
-    min-height: 100vh;
+    width: 100%;
+    max-width: 420px;
+    height: 100vh;
+    height: 100dvh;
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     margin: auto;
-    padding: 20px;
 }
 
 /* HEADER */
-
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 35px;
 }
 
 .logo {
-    font-size: 23px;
+    font-size: 22px;
     font-weight: 800;
     letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .online {
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 8px;
     font-size: 12px;
+    font-weight: 600;
     color: #8b96a5;
+    letter-spacing: 0.5px;
 }
 
 .dot {
@@ -179,53 +194,58 @@ body {
     height: 9px;
     border-radius: 50%;
     background: #22c55e;
-    box-shadow: 0 0 12px #22c55e;
+    box-shadow: 0 0 10px #22c55e;
 }
 
 /* CONTROL */
+.controls-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 20px 0;
+}
 
 .controls {
     width: 100%;
+    max-width: 320px;
     display: grid;
-
-    grid-template-columns:
-        1fr 1fr 1fr;
-
-    grid-template-rows:
-        90px 90px 90px;
-
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 90px);
     gap: 14px;
 }
 
 button {
     border: none;
+    outline: none;
     color: white;
     font-weight: bold;
-    touch-action: manipulation;
+    touch-action: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    line-height: 1;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .control {
     background: #151b23;
-
     border: 1px solid #26303c;
-
     border-radius: 22px;
-
     font-size: 32px;
-
-    box-shadow:
-        0 8px 20px rgba(0,0,0,.3);
-
-    transition: .08s;
+    box-shadow: 0 8px 20px rgba(0,0,0,.3);
+    transition: transform 0.08s ease, background 0.08s ease;
 }
 
 .control:active {
-    transform: scale(.93);
+    transform: scale(0.93);
     background: #27313e;
 }
 
 /* POSITIONS */
-
 .forward {
     grid-column: 2;
     grid-row: 1;
@@ -239,13 +259,10 @@ button {
 .stop {
     grid-column: 2;
     grid-row: 2;
-
     background: #351a1e;
-
     color: #ff5964;
-
-    font-size: 17px;
-
+    font-size: 16px;
+    letter-spacing: 1px;
     border: 1px solid #57262d;
 }
 
@@ -264,270 +281,186 @@ button {
 }
 
 /* SPEED */
-
 .speed-card {
-    margin-top: 35px;
-
     background: #121820;
-
     border: 1px solid #202a35;
-
     border-radius: 18px;
-
-    padding: 20px;
+    padding: 18px 20px;
 }
 
 .speed-header {
     display: flex;
     justify-content: space-between;
-
-    margin-bottom: 15px;
+    align-items: center;
+    margin-bottom: 14px;
 }
 
 .speed-title {
     font-size: 12px;
+    font-weight: 700;
     color: #7f8a98;
     letter-spacing: 1px;
 }
 
 .speed-value {
-    font-weight: bold;
+    font-weight: 700;
+    font-size: 16px;
+    color: #38bdf8;
 }
 
 input[type="range"] {
     width: 100%;
-
+    height: 6px;
+    border-radius: 3px;
+    background: #26303c;
     accent-color: #38bdf8;
+    cursor: pointer;
 }
 
 /* KEYBOARD */
-
 .keyboard {
     text-align: center;
-
-    margin-top: 18px;
-
     color: #4f5a68;
-
     font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
-
 </style>
-
 </head>
-
-<body>
+<body oncontextmenu="return false;">
 
 <div class="container">
-
     <div class="header">
-
-        <div class="logo">
-            🤖 ROBOCEK
-        </div>
-
+        <div class="logo">🤖 ROBOCEK</div>
         <div class="online">
             <span class="dot"></span>
             CONNECTED
         </div>
-
     </div>
 
+    <div class="controls-wrapper">
+        <div class="controls">
+            <button class="control forward"
+                ontouchstart="handleTouchStart(event, 'forward')" ontouchend="handleTouchEnd(event)" ontouchcancel="handleTouchEnd(event)"
+                onmousedown="handleMouseDown('forward')" onmouseup="handleMouseUp()" onmouseleave="handleMouseUp()">
+                ▲
+            </button>
 
-    <div class="controls">
+            <button class="control left"
+                ontouchstart="handleTouchStart(event, 'left')" ontouchend="handleTouchEnd(event)" ontouchcancel="handleTouchEnd(event)"
+                onmousedown="handleMouseDown('left')" onmouseup="handleMouseUp()" onmouseleave="handleMouseUp()">
+                ◀
+            </button>
 
-        <button
-            class="control forward"
-            ontouchstart="start('forward')"
-            ontouchend="stop()"
-            onmousedown="start('forward')"
-            onmouseup="stop()">
+            <button class="control stop"
+                ontouchstart="handleTouchStart(event, 'stop')" ontouchend="handleTouchEnd(event)"
+                onclick="stop()">
+                STOP
+            </button>
 
-            ▲
+            <button class="control right"
+                ontouchstart="handleTouchStart(event, 'right')" ontouchend="handleTouchEnd(event)" ontouchcancel="handleTouchEnd(event)"
+                onmousedown="handleMouseDown('right')" onmouseup="handleMouseUp()" onmouseleave="handleMouseUp()">
+                ▶
+            </button>
 
-        </button>
-
-
-        <button
-            class="control left"
-            ontouchstart="start('left')"
-            ontouchend="stop()"
-            onmousedown="start('left')"
-            onmouseup="stop()">
-
-            ◀
-
-        </button>
-
-
-        <button
-            class="control stop"
-            onclick="stop()">
-
-            STOP
-
-        </button>
-
-
-        <button
-            class="control right"
-            ontouchstart="start('right')"
-            ontouchend="stop()"
-            onmousedown="start('right')"
-            onmouseup="stop()">
-
-            ▶
-
-        </button>
-
-
-        <button
-            class="control backward"
-            ontouchstart="start('backward')"
-            ontouchend="stop()"
-            onmousedown="start('backward')"
-            onmouseup="stop()">
-
-            ▼
-
-        </button>
-
+            <button class="control backward"
+                ontouchstart="handleTouchStart(event, 'backward')" ontouchend="handleTouchEnd(event)" ontouchcancel="handleTouchEnd(event)"
+                onmousedown="handleMouseDown('backward')" onmouseup="handleMouseUp()" onmouseleave="handleMouseUp()">
+                ▼
+            </button>
+        </div>
     </div>
-
 
     <div class="speed-card">
-
         <div class="speed-header">
-
-            <span class="speed-title">
-                SPEED
-            </span>
-
-            <span class="speed-value">
-                <span id="speedValue">200</span>
-            </span>
-
+            <span class="speed-title">SPEED</span>
+            <span class="speed-value"><span id="speedValue">200</span></span>
         </div>
-
-        <input
-            id="speed"
-            type="range"
-            min="0"
-            max="255"
-            value="200"
-            oninput="changeSpeed(this.value)">
-
+        <input id="speed" type="range" min="0" max="255" value="200" oninput="changeSpeed(this.value)">
     </div>
-
 
     <div class="keyboard">
         W A S D / ARROW KEYS
     </div>
-
 </div>
 
-
 <script>
-
 let active = false;
+let isTouch = false;
 
-
-// =========================
-// SEND COMMAND
-// =========================
-
-function start(direction)
-{
+function start(direction) {
+    if (direction === 'stop') {
+        stop();
+        return;
+    }
     active = true;
-
     fetch("/move?dir=" + direction);
 }
 
-
-function stop()
-{
-    if (!active)
-        return;
-
+function stop() {
+    if (!active) return;
     active = false;
-
     fetch("/move?dir=stop");
 }
 
+function handleTouchStart(e, direction) {
+    if (e) e.preventDefault();
+    isTouch = true;
+    start(direction);
+}
 
-// =========================
-// SPEED
-// =========================
+function handleTouchEnd(e) {
+    if (e) e.preventDefault();
+    stop();
+}
 
-function changeSpeed(value)
-{
+function handleMouseDown(direction) {
+    if (isTouch) return;
+    start(direction);
+}
+
+function handleMouseUp() {
+    if (isTouch) return;
+    stop();
+}
+
+function changeSpeed(value) {
     document.getElementById("speedValue").innerText = value;
-
     fetch("/speed?value=" + value);
 }
 
+document.addEventListener("contextmenu", function(e) {
+    e.preventDefault();
+    return false;
+}, false);
 
-// =========================
-// KEYBOARD
-// =========================
+document.addEventListener("selectstart", function(e) {
+    e.preventDefault();
+    return false;
+}, false);
 
-document.addEventListener("keydown", function(e)
-{
-    if (e.repeat)
-        return;
-
-    if (e.key === "ArrowUp" || e.key === "w")
-        start("forward");
-
-    else if (e.key === "ArrowDown" || e.key === "s")
-        start("backward");
-
-    else if (e.key === "ArrowLeft" || e.key === "a")
-        start("left");
-
-    else if (e.key === "ArrowRight" || e.key === "d")
-        start("right");
-
-    else if (e.key === " ")
-        stop();
+document.addEventListener("keydown", function(e) {
+    if (e.repeat) return;
+    if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") start("forward");
+    else if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") start("backward");
+    else if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") start("left");
+    else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") start("right");
+    else if (e.key === " ") stop();
 });
 
-
-document.addEventListener("keyup", function(e)
-{
-    if (
-        e.key === "ArrowUp" ||
-        e.key === "ArrowDown" ||
-        e.key === "ArrowLeft" ||
-        e.key === "ArrowRight" ||
-        e.key === "w" ||
-        e.key === "a" ||
-        e.key === "s" ||
-        e.key === "d"
-    )
-    {
+document.addEventListener("keyup", function(e) {
+    if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","w","a","s","d","W","A","S","D"].includes(e.key)) {
         stop();
     }
 });
 
-
-// Prevent scrolling while controlling
-
-document.addEventListener(
-    "touchmove",
-    function(e)
-    {
-        e.preventDefault();
-    },
-    { passive: false }
-);
-
+document.addEventListener("touchmove", function(e) {
+    e.preventDefault();
+}, { passive: false });
 </script>
-
 </body>
-
 </html>
-
 )rawliteral";
 
 // =========================
